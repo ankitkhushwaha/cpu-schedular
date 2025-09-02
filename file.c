@@ -22,7 +22,7 @@ extern burst_line *read_burstfile(char *file_path)
     fgets(str, 1024, fp);
 }
 
-void _process_burst_line_s(char *line_s, burst_data *output){
+void _process_burst_line_s(char *line_s, burst_line *output){
 
 }
 
