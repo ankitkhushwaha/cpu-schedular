@@ -1,9 +1,9 @@
 
 build:
-	gcc -g -o linkedList linkedList.c
+	gcc -g -o queue queue.c
 
 all: build
-	./linkedList
+	./queue
 
 gdb: build
-	gdb linkedList
+	gdb queue

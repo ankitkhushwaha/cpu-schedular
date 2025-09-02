@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "stdlib.h": "c",
+        "dbg.h": "c",
+        "assert.h": "c",
+        "linkedlist.h": "c",
+        "stdio.h": "c",
+        "queue.h": "c"
+    }
+}
