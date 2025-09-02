@@ -5,6 +5,7 @@
         "assert.h": "c",
         "linkedlist.h": "c",
         "stdio.h": "c",
-        "queue.h": "c"
+        "queue.h": "c",
+        "cstdlib": "c"
     }
 }
