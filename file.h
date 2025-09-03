@@ -18,6 +18,6 @@ typedef struct burst_data
     int t_process;
 } burst_data;
 
-extern burst_line *read_burstfile(char *, burst_data *);
+extern burst_data * read_burstfile(char *);
 
 #endif
