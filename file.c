@@ -4,34 +4,83 @@
 #include "file.h"
 #include "dbg.h"
 
-extern burst_line *read_burstfile(char *file_path)
+void _process_burst_line_s(char **, int, burst_line **);
+void _process_burst_line(char *, burst_line *);
+
+extern burst_line *read_burstfile(char *file_path, burst_line **output)
 {
     FILE *fp;
-    burst_line *output;
     fp = fopen(file_path, "r");
     if (!fp)
     {
         perror("Failed to open file");
         exit(EXIT_FAILURE);
     }
+
     // skip first 3 lines
     int i = 0;
-    char *str = (char *)calloc(1024, sizeof(char));
+    char **str = (char **)calloc(1024, sizeof(char *));
+    for (i = 0; i < 1024; i++)
+    {
+        str[i] = (char *)calloc(1024, sizeof(char));
+    }
     fseek(fp, 20, SEEK_SET);
 
-    fgets(str, 1024, fp);
+    int total_process = 0;
+    while (!feof(fp))
+    {
+        fgets(str[total_process++], 1024, fp);
+        // strcat(str[i], )
+    }
+
+    total_process = total_process - 2;
+
+#ifdef DEBUG
+    for (i = 0; i < total_process; i++)
+    {
+        debug("%d: %s", i, str[i]);
+    }
+#endif
+
+    output = (burst_line **)calloc(total_process, sizeof(burst_line *));
+    for (i = 0; i < total_process; i++)
+    {
+        output[i] = (burst_line *)calloc(1, sizeof(burst_line));
+    }
+    // exclude last line
+    _process_burst_line_s(str, total_process, output);
+
+    // return output;
+    fclose(fp);
 }
 
-void _process_burst_line_s(char *line_s, burst_line *output){
-
+void _process_burst_line_s(char **line_s, int total_process, burst_line **output)
+{
+    int i = 0;
+    for (i = 0; i < total_process; i++)
+    {
+        _process_burst_line(line_s[i], output[i]);
+    }
 }
 
 // this function assumes to get correct burst data
 // e.g "0 100 2 90 2 80 3 70 2 60 2 10 -1\n"
 void _process_burst_line(char *line, burst_line *data)
 {
-    check(line, "string is Null");
-    check(data, "burst_data is NUll");
+    if (!line)
+    {
+        fprintf(stderr, "Line string is Null.");
+        return;
+    }
+    if (!data)
+    {
+        fprintf(stderr, "burst_data is NUll.");
+        return;
+    }
+    // strtok modifies the *line so it can't accept char *
+    int l_line = strlen(line) + 1;
+    char string[l_line];
+    strcpy(string, line);
 
     int a_time;
     char *savetoken;
@@ -39,22 +88,27 @@ void _process_burst_line(char *line, burst_line *data)
     int *cpu_burst = (int *)calloc(1024, sizeof(int));
     int *io_burst = (int *)calloc(1024, sizeof(int));
 
-    char *token = strtok_r(line, delimiter, &savetoken);
+    char *token = strtok_r(string, delimiter, &savetoken);
     if (!token)
     {
         // No token present
-        goto error;
+        return;
     }
-    data->a_time = atoi(token);
+    a_time = atoi(token);
 
     int i, cpu_burst_size, io_burst_size;
     i = cpu_burst_size = io_burst_size = 0;
     for (i = 0, token = strtok_r(NULL, delimiter, &savetoken); token != NULL;
          i++, token = strtok_r(NULL, delimiter, &savetoken))
     {
-        if (strcmp(token, "-1") == 0)
+        int is_end = strcmp(token, "-1");
+        if (is_end == 0)
+        {
+            debug("token: %s\n", token);
             break;
-        // use strtol for error handlling https://stackoverflow.com/questions/14176123/correct-usage-of-strtol
+        }
+        // use strtol for error handlling 
+        // https://stackoverflow.com/questions/14176123/correct-usage-of-strtol
         if (i % 2 == 0)
         {
             cpu_burst[cpu_burst_size++] = atoi(token);
@@ -66,30 +120,42 @@ void _process_burst_line(char *line, burst_line *data)
             debug("%d", io_burst[io_burst_size - 1]);
         }
     }
+
+    data->a_time = a_time;
+    data->cpu_burst_size = cpu_burst_size;
+    data->io_burst_size = io_burst_size;
+    
     data->cpu_burst = calloc(cpu_burst_size, sizeof(int));
     data->io_burst = calloc(io_burst_size, sizeof(int));
 
     int j = 0;
     for (j = 0; j < cpu_burst_size; j++)
     {
-        data->cpu_burst[j] = cpu_burst[i];
+        data->cpu_burst[j] = cpu_burst[j];
     }
     for (j = 0; j < io_burst_size; j++)
     {
-        data->io_burst[j] = io_burst[i];
+        data->io_burst[j] = io_burst[j];
     }
+
     free(cpu_burst);
     free(io_burst);
-
-error:
 }
 
 int main(int argc, char *argv[])
 {
-    burst_line *data = (burst_line *)calloc(1, sizeof(burst_line));
+    burst_line **data;
 
-    char str[] = "6 10 2 60 2 30 3 70 2 10 2 10 -1";
-    _process_burst_line(str, data);
-
+    char *str[] = {"6 10 2 60 2 30 3 70 2 10 2 10 -1", "0 15 2 5 2 15 2 5 2 15 2 5 2 15 2 5 2 15 2 5 2 15 2 5 2 15 2 5 2 15 2 5 2 5 2 15 2 5 2 5 -1"
+                                                       "2 100 2 180 2 10 -1"};
+    char *s = "6 1 -1";
+    // strcat(s, '\0');
+    // _process_burst_line_s(str, 3, data);
+    // burst_line *hello = (burst_line *)calloc(1, sizeof(burst_line));
+    // _process_burst_line(s, hello);
+    read_burstfile("test_cases/process1.dat", data);
+    
+    int i = 0;
+    for (i=0; i< data->)
     return 0;
 }

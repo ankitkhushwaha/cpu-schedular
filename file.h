@@ -3,16 +3,21 @@
 
 #include <stdio.h>
 
-
 typedef struct burst_line
 {
     int *cpu_burst;
     int *io_burst;
     int a_time;
+    int cpu_burst_size;
+    int io_burst_size;
 } burst_line;
 
-burst_line *burst_data;
+typedef struct burst_data
+{
+    burst_line **b_data;
+    int t_process;
+} burst_data;
 
-extern burst_data *read_burstfile(char *);
+extern burst_line *read_burstfile(char *, burst_line **);
 
 #endif
