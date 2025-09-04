@@ -6,6 +6,4 @@
 Queue *readyQueue;
 Queue *waitQueue;
 
-int schedular()
-
 #endif

@@ -56,13 +56,13 @@ node *dequeue(Queue *queue)
 
     node *tnode, *snode;
     tnode = snode = queue->front;
+    snode->next = NULL;
 
     tnode = tnode->next;
     queue->front = tnode;
     queue->len--;
 
-    free(snode);
-    return queue->front;
+    return snode;
 }
 
 bool isEmpty(Queue *queue)
