@@ -48,13 +48,13 @@ void print_usage(const char *prog_name) {
 // }
 
 int main(int argc, char *argv[]){
-    if (argc != 3) {
-        print_usage(argv[0]);
-        return 1;
-    }
+    // if (argc != 3) {
+    //     print_usage(argv[0]);
+    //     return 1;
+    // }
 
-    char *scheduler = argv[1];
-    char *input_file = argv[2];
+    // char *scheduler = argv[1];
+    char *input_file = argv[1];
     
     // Read the input file
     burst_data *data = read_burstfile(input_file);
