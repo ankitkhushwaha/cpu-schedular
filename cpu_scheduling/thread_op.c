@@ -11,18 +11,17 @@ void *init_queues(){
 }
 
 void *add_to_readyQueue(burst_line *process_t){
-    
     enqueue(readyQueue, process_t);
 }
 
-void *add_to_waitQueue(Queue *process_t){
+void *add_to_waitQueue(burst_line *process_t){
     enqueue(waitQueue, process_t);
 }
 
-Queue *remove_from_readyQueue(Queue *process_t){
-    return dequeue(process_t);
+Queue *remove_from_readyQueue(){
+    return dequeue(readyQueue);
 }
 
-Queue *remove_from_waitQueue(Queue *process_t){
-    return dequeue(process_t);
+Queue *remove_from_waitQueue(){
+    return dequeue(waitQueue);
 }
