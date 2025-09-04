@@ -7,7 +7,7 @@
 static void _process_burst_line_s(char **, burst_data *);
 static void _process_burst_line(char *, burst_line *);
 
-extern burst_data *
+burst_data *
 read_burstfile(char *file_path)
 {
     FILE *fp;
@@ -150,26 +150,26 @@ _process_burst_line(char *line, burst_line *data)
     free(io_burst);
 }
 
-int main(int argc, char *argv[])
-{
+// int main(int argc, char *argv[])
+// {
     // char *str[] = {"6 10 2 60 2 30 3 70 2 10 2 10 -1", "0 15 2 5 2 15 2 5 2 15 2 5 2 15 2 5 2 15 2 5 2 15 2 5 2 15 2 5 2 15 2 5 2 5 2 15 2 5 2 5 -1"
     // char *s = "6 1 -1";
     // _process_burst_line_s(str, 3, data);
     // burst_line *hello = (burst_line *)calloc(1, sizeof(burst_line));
     // _process_burst_line(s, hello);
-    burst_data *data = read_burstfile("test_cases/process3.dat");
+    // burst_data *data = read_burstfile("test_cases/process3.dat");
 
-#ifndef NDEBUG
-    debug("t_process: %d", data->t_process);
-    debug("");
+// #ifndef NDEBUG
+//     debug("t_process: %d", data->t_process);
+//     debug("");
 
-    int i = 0;
-    debug("cpu_burst_size[last_index]: %d", data->b_data[data->t_process - 1]->cpu_burst_size);
-    for (i = 0; i < data->b_data[data->t_process - 1]->cpu_burst_size; i++)
-    {
-        debug("%dth index: %d", i, data->b_data[data->t_process - 1]->cpu_burst[i]);
-    }
-#endif
+//     int i = 0;
+//     debug("cpu_burst_size[last_index]: %d", data->b_data[data->t_process - 1]->cpu_burst_size);
+//     for (i = 0; i < data->b_data[data->t_process - 1]->cpu_burst_size; i++)
+//     {
+//         debug("%dth index: %d", i, data->b_data[data->t_process - 1]->cpu_burst[i]);
+//     }
+// #endif
 
-    return 0;
-}
+//     return 0;
+// }

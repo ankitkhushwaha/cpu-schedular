@@ -1,8 +1,10 @@
-C_FLAGS = -Wall -Isrc -DNDEBUG
+C_FLAGS = -Wall -Isrc -Icpu_scheduling -DNDEBUG
 
 
-SOURCES=$(wildcard src/*.c)
+SOURCES=$(wildcard src/*.c cpu_scheduling/*.c)
 OBJECTS=$(patsubst %.c, %.o, $(SOURCES))
 
-TARGET=build/linklist.o
+# TARGET=build/main.o
 
+all: $(OBJECTS) main.c
+	$(CC) $(C_FLAGS) $(OBJECTS) main.c -o $(TARGET)

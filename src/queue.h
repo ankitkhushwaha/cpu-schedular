@@ -2,10 +2,11 @@
 #define QUEUE_H
 
 #include <stdbool.h>
+#include "file.h"
 
 typedef struct Node
 {
-    int data;
+    burst_line *data;
     struct Node *next;
 } node;
 
@@ -22,7 +23,7 @@ typedef struct
          tnode = tnode->next)
 
 Queue *queue_create();
-node *enqueue(Queue *, int);
+node *enqueue(Queue *, burst_line *);
 node *dequeue(Queue *);
 bool isEmpty(Queue *);
 

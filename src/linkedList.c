@@ -87,29 +87,29 @@ void validate_list(linkedList *list, int *arr, int size)
     }
 }
 
-int main(int argc, char *argv[])
-{
-    linkedList *list = list_create();
-    list_add(list, 2);
-    list_add(list, 3);
-    list_add(list, 4);
+// int main(int argc, char *argv[])
+// {
+//     linkedList *list = list_create();
+//     list_add(list, 2);
+//     list_add(list, 3);
+//     list_add(list, 4);
 
-    int arr[] = {2, 3, 4};
-    validate_list(list, arr, 3);
+//     int arr[] = {2, 3, 4};
+//     validate_list(list, arr, 3);
     
-    list_print(list);
-    list_RemoveFromEnd(list);
-    list_print(list);
-    list_add(list, 5);
+//     list_print(list);
+//     list_RemoveFromEnd(list);
+//     list_print(list);
+//     list_add(list, 5);
     
-    int arr2[] = {2, 3, 5};
-    validate_list(list, arr2, 3);
+//     int arr2[] = {2, 3, 5};
+//     validate_list(list, arr2, 3);
     
-    list_RemoveFromFront(list);
-    list_add(list, 1);
+//     list_RemoveFromFront(list);
+//     list_add(list, 1);
     
-    int arr3[] = {3, 5, 1};
-    validate_list(list, arr3, 3);
+//     int arr3[] = {3, 5, 1};
+//     validate_list(list, arr3, 3);
 
-    list_print(list);
-}
+//     list_print(list);
+// }

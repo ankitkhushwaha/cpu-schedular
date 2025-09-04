@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "file.h"
 #include "dbg.h"
 #include "queue.h"
 
@@ -13,9 +14,13 @@ error:
     exit(EXIT_FAILURE);
 }
 
-node *enqueue(Queue *queue, int data)
+node *enqueue(Queue *queue, burst_line *data)
 {
     node *newnode = (node *)calloc(1, sizeof(node));
+    check_mem(newnode);
+
+    newnode->data = (burst_line *)calloc(1, sizeof(burst_line));
+    check_mem(newnode->data);
     newnode->data = data;
     check_mem(newnode);
 
@@ -45,8 +50,7 @@ node *dequeue(Queue *queue)
         return NULL;
     }
     if (!queue->front->next)
-    {
-
+    {        
         node *tnode = queue->front;
         queue->front = queue->rear = NULL;
         queue->len--;
@@ -83,27 +87,27 @@ void queue_print(Queue *queue)
     node *tnode;
     Traverse(tnode, queue)
     {
-        printf("%d ", tnode->data);
+        // printf("%d ", tnode->data);
     }
-    printf("%d\n", tnode->data);
+    // printf("%d\n", tnode->data);
 }
 
-int main(int argc, char *argv[])
-{
-    Queue *queue = queue_create();
-    enqueue(queue, 2);
-    enqueue(queue, 3);
-    enqueue(queue, 4);
+// int main(int argc, char *argv[])
+// {
+//     Queue *queue = queue_create();
+//     enqueue(queue, 2);
+//     enqueue(queue, 3);
+//     enqueue(queue, 4);
 
-    // int arr[] = {2, 3, 4};
-    // validate_list(list, arr, 3);
+//     // int arr[] = {2, 3, 4};
+//     // validate_list(list, arr, 3);
 
-    queue_print(queue);
+//     queue_print(queue);
 
-    dequeue(queue);
-    dequeue(queue);
-    dequeue(queue);
-    queue_print(queue);
+//     dequeue(queue);
+//     dequeue(queue);
+//     dequeue(queue);
+//     queue_print(queue);
     // dequeue(queue);
     // list_RemoveFromEnd(list);
     // list_print(list);
@@ -119,4 +123,4 @@ int main(int argc, char *argv[])
     // validate_list(list, arr3, 3);
 
     // list_print(list);
-}
+// }
