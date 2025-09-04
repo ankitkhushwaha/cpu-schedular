@@ -16,6 +16,6 @@ typedef struct burst_data
     int t_process;
 } burst_data;
 
-burst_data * read_burstfile(char *);
+burst_data *read_burstfile(char *);
 
 #endif

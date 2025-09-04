@@ -7,9 +7,9 @@ extern Queue *readyQueue;
 extern Queue *waitQueue;
 
 void *init_queues();
-void *add_to_readyQueue(Queue *);
-void *add_to_waitQueue(Queue *);
-Queue *remove_from_readyQueue(Queue *);
-Queue *remove_from_waitQueue(Queue *);
+void *add_to_readyQueue(burst_line *);
+void *add_to_waitQueue(burst_line *);
+node *remove_from_readyQueue();
+node *remove_from_waitQueue();
 
 #endif

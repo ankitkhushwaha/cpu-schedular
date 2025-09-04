@@ -8,6 +8,7 @@
         "queue.h": "c",
         "cstdlib": "c",
         "string.h": "c",
-        "file.h": "c"
+        "file.h": "c",
+        "thread_op.h": "c"
     }
 }
