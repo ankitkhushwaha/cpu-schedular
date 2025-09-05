@@ -7,9 +7,11 @@
 #include "thread_op.h"
 #include "cpu_thread.h"
 
+
 Queue *readyQueue;
 Queue *waitQueue;
 int global_counter = 0;
+int TOTAL_PROCESS  = 0;
 
 sem_t empty;
 sem_t full;
@@ -69,8 +71,8 @@ int main(int argc, char *argv[]){
     sem_init(&empty, 0, data->t_process); 
     sem_init(&full, 0, 0);        
 
-    // arrivalQueue(&data);
-    if (pthread_create(&arrivalThread, NULL, (void *)arrivalQueue, &data) != 0) {
+    // add_arrival_process(&data);
+    if (pthread_create(&arrivalThread, NULL, (void *)add_arrival_process, &data) != 0) {
         perror("Failed to create arrival thread");
         return 1;
     }

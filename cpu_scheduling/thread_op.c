@@ -4,7 +4,7 @@
 #include "file.h"
 #include "thread_op.h"
 #include "queue.h"
-
+#include "process.h"
 
 void *init_queues(){
     readyQueue = queue_create();
@@ -17,6 +17,8 @@ error:
 }
 
 void *add_to_readyQueue(burst_line *process_data){
+    process_t *p = create_process();
+    
     enqueue(readyQueue, process_data);
     return NULL;
 }

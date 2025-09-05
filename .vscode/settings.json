@@ -9,6 +9,8 @@
         "cstdlib": "c",
         "string.h": "c",
         "file.h": "c",
-        "thread_op.h": "c"
+        "thread_op.h": "c",
+        "pthread.h": "c",
+        "semaphore.h": "c"
     }
 }

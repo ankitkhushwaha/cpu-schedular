@@ -2,6 +2,7 @@
 #define THREAD_OP_H
 
 #include "queue.h"
+#include "process.h"
 
 extern Queue *readyQueue;
 extern Queue *waitQueue;
@@ -9,7 +10,7 @@ extern Queue *waitQueue;
 void *init_queues();
 void *add_to_readyQueue(burst_line *);
 void *add_to_waitQueue(burst_line *);
-node *remove_from_readyQueue();
-node *remove_from_waitQueue();
+process_t *remove_from_readyQueue();
+process_t *remove_from_waitQueue();
 
 #endif

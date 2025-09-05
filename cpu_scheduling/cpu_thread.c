@@ -4,17 +4,18 @@
 #include "cpu_thread.h"
 #include "thread_op.h"
 
-extern pthread_mutex_t g_counter_mutex;
-extern int global_counter;
-
-void *arrivalQueue(burst_data **data){
-    int j=0;
+void *add_arrival_process(burst_data **data)
+{
+    int j = 0;
     int t_process = (*data)->t_process;
     debug("total process: %d", t_process);
-    while (j != t_process){
+    while (j != t_process)
+    {
         pthread_mutex_lock(&g_counter_mutex);
-        if ((*data)->b_data[j]->a_time == global_counter){
+        if ((*data)->b_data[j]->a_time == global_counter)
+        {
             add_to_readyQueue((*data)->b_data[j]);
+            sem_post(&full);
             debug("process %d is added to ready queue", j);
             j++;
         }
@@ -22,4 +23,15 @@ void *arrivalQueue(burst_data **data){
         pthread_mutex_unlock(&g_counter_mutex);
     }
     return NULL;
+}
+
+void *schedular()
+{
+    while (1)
+    {
+        sem_wait(&full);
+        pthread_mutex_lock(&readyQueue_mutex);
+        
+        pthread_mutex_unlock(&readyQueue_mutex);
+    }
 }
