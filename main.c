@@ -69,10 +69,12 @@ int main(int argc, char *argv[]){
     sem_init(&empty, 0, data->t_process); 
     sem_init(&full, 0, 0);        
 
-    if (pthread_create(&arrivalThread, NULL, (void *)arrivalQueue, data) != 0) {
+    // arrivalQueue(&data);
+    if (pthread_create(&arrivalThread, NULL, (void *)arrivalQueue, &data) != 0) {
         perror("Failed to create arrival thread");
         return 1;
     }
+    pthread_join(arrivalThread, NULL);
 
     sem_destroy(&empty);
     sem_destroy(&full);

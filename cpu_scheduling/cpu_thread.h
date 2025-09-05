@@ -5,6 +5,6 @@
 #include "file.h"
 
 Queue *schedular(Queue **);
-void *arrivalQueue(burst_data *);
+void *arrivalQueue(burst_data **);
 
 #endif
