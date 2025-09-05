@@ -9,8 +9,11 @@ OBJECTS=$(patsubst %.c, %.o, $(SOURCES))
 
 # TARGET=build/main.o
 
-all: 
+all: $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) main.c -o main
 
 gdb:
 	gdb --args ./main test_cases/process1.dat
+
+clean: $(OBJECTS)
+	rm -rf $(OBJECTS) main
