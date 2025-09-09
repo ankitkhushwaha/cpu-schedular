@@ -6,10 +6,11 @@
 #include "file.h"
 #include "thread_op.h"
 #include "cpu_thread.h"
-
+#include "process.h"
 
 Queue *readyQueue;
 Queue *waitQueue;
+process_t *running_pd;
 int global_counter = 0;
 int TOTAL_PROCESS  = 0;
 

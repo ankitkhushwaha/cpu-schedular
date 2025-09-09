@@ -4,6 +4,7 @@ CFLAGS = -Wall -g -Isrc -Icpu_scheduling
 SOURCES=$(wildcard src/*.c cpu_scheduling/*.c)
 OBJECTS=$(patsubst %.c, %.o, $(SOURCES))
 
+TEST_OBJECTS=$(wildcard src/*.o cpu_scheduling/*.o)
 # %.o: %.c
 # 	$(CC) $(CFLAGS) -c -o $@ $<
 
@@ -15,5 +16,5 @@ all: $(OBJECTS)
 gdb:
 	gdb --args ./main test_cases/process1.dat
 
-clean: $(OBJECTS)
-	rm -rf $(OBJECTS) main
+clean: $(TEST_OBJECTS)
+	rm -rf $(TEST_OBJECTS)

@@ -29,7 +29,7 @@ void *schedular()
 {
     while (1)
     {
-        sem_wait(&full);
+        sem_wait(&empty);
         pthread_mutex_lock(&readyQueue_mutex);
         
         pthread_mutex_unlock(&readyQueue_mutex);

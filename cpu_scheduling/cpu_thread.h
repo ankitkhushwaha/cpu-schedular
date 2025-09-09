@@ -10,6 +10,7 @@
 
 extern int global_counter;
 extern int TOTAL_PROCESS;
+extern process_t *running_pd;
 extern sem_t empty;
 extern sem_t full;
 extern pthread_mutex_t g_counter_mutex;

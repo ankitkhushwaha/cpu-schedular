@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "file.h"
+#include "process.h"
 #include "dbg.h"
 #include "queue.h"
+#include "process.h"
 
 Queue *queue_create()
 {
@@ -14,14 +15,14 @@ error:
     exit(EXIT_FAILURE);
 }
 
-node *enqueue(Queue *queue, burst_line *data)
+node *enqueue(Queue *queue, process_t *pd)
 {
     node *newnode = (node *)calloc(1, sizeof(node));
     check_mem(newnode);
 
-    newnode->data = (burst_line *)calloc(1, sizeof(burst_line));
+    newnode->data = (process_t *)calloc(1, sizeof(process_t));
     check_mem(newnode->data);
-    newnode->data = data;
+    newnode->data = pd;
     check_mem(newnode);
 
     if (!queue->front)
@@ -41,7 +42,7 @@ error:
     return NULL;
 }
 
-node *dequeue(Queue *queue)
+process_t *dequeue(Queue *queue)
 {
 
     if (isEmpty(queue))
@@ -66,7 +67,7 @@ node *dequeue(Queue *queue)
     queue->front = tnode;
     queue->len--;
 
-    return snode;
+    return snode->data;
 }
 
 bool isEmpty(Queue *queue)
