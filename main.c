@@ -10,10 +10,11 @@
 
 Queue *readyQueue;
 Queue *waitQueue;
+Queue *task_list;
 process_t *running_pd;
 int global_counter = 0;
 int T_PROCESS = 0;
-int TOTAL_PROCESS  = 0;
+int TOTAL_PROCESS = 0;
 int TERMINATED_PROCESS = 0;
 
 sem_t empty;
@@ -22,8 +23,8 @@ pthread_mutex_t g_counter_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t readyQueue_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t waitQueue_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-
-void print_usage(const char *prog_name) {
+void print_usage(const char *prog_name)
+{
     printf("Usage: %s <scheduler> <input_file>\n", prog_name);
     printf("Available schedulers:\n");
     printf("  fcfs    - First-Come-First-Serve scheduling\n");
@@ -52,7 +53,8 @@ void print_usage(const char *prog_name) {
 //     }
 // }
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[])
+{
     // if (argc != 3) {
     //     print_usage(argv[0]);
     //     return 1;
@@ -60,26 +62,40 @@ int main(int argc, char *argv[]){
 
     // char *scheduler = argv[1];
     char *input_file = argv[1];
-    
+
     // Read the input file
     burst_data *data = read_burstfile(input_file);
     check(data != NULL, "Failed to read input file '%s'", input_file);
     TOTAL_PROCESS = data->t_process;
     init_queues();
-    
-    pthread_t arrivalThread;
+
+    pthread_t arrivalThread, schedularThread, wakeupThread;
     // pthread_t cpuThread;
     // pthread_t ioThread;
 
-    sem_init(&empty, 0, TOTAL_PROCESS); 
-    sem_init(&full, 0, 0);        
+    sem_init(&empty, 0, TOTAL_PROCESS);
+    sem_init(&full, 0, 0);
 
     // add_arrival_process(&data);
-    if (pthread_create(&arrivalThread, NULL, (void *)add_arrival_process, &data) != 0) {
+    if (pthread_create(&arrivalThread, NULL, (void *)add_arrival_process, &data) != 0)
+    {
         perror("Failed to create arrival thread");
         return 1;
     }
+    if (pthread_create(&schedularThread, NULL, (void *)schedular, NULL) != 0)
+    {
+        perror("Failed to create schedular thread");
+        return 1;
+    }
+
+    if (pthread_create(&wakeupThread, NULL, (void *)wake_up, NULL) != 0)
+    {
+        perror("Failed to create wake_up thread");
+        return 1;
+    }
     pthread_join(arrivalThread, NULL);
+    pthread_join(schedularThread, NULL);
+    pthread_join(wakeupThread, NULL);
 
     sem_destroy(&empty);
     sem_destroy(&full);

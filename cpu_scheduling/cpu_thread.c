@@ -15,7 +15,13 @@ void *add_arrival_process(burst_data **data)
         pthread_mutex_lock(&g_counter_mutex);
         if ((*data)->b_data[j]->a_time == global_counter)
         {
-            add_to_readyQueue((*data)->b_data[j]);
+            process_t *p = create_process();
+            check(p, "failed to create process");
+            p->process_d = (*data)->b_data[j];
+
+            add_to_readyQueue(p);
+            add_to_taskList(p);
+
             sem_post(&full);
             debug("process %d is added to ready queue", j);
             j++;
@@ -23,6 +29,8 @@ void *add_arrival_process(burst_data **data)
         global_counter++;
         pthread_mutex_unlock(&g_counter_mutex);
     }
+    return NULL;
+error:
     return NULL;
 }
 
@@ -35,7 +43,8 @@ bool _should_terminate(process_t *pd)
     }
     if (pd->process_d->io_burst_size == 0)
     {
-        if (pd->cpu_index < pd->process_d->cpu_burst_size){
+        if (pd->cpu_index < pd->process_d->cpu_burst_size)
+        {
             return false;
         }
         return true;
@@ -99,6 +108,7 @@ void *_process_io(process_t **pd)
     if (_should_terminate(*pd))
     {
         (*pd)->status = TEMINATED;
+
         return NULL;
     }
     // io work will be done
@@ -119,7 +129,7 @@ error:
 
 void *schedular()
 {
-    while (TERMINATED_PROCESS >= TOTAL_PROCESS)
+    while (TOTAL_PROCESS <= TERMINATED_PROCESS)
     {
         sem_wait(&empty);
         pthread_mutex_lock(&readyQueue_mutex);
@@ -128,11 +138,12 @@ void *schedular()
         pthread_mutex_unlock(&readyQueue_mutex);
         sem_post(&full);
     }
+    return NULL;
 }
 
 void *wake_up()
 {
-    while (TERMINATED_PROCESS >= TOTAL_PROCESS)
+    while (TOTAL_PROCESS <= TERMINATED_PROCESS)
     {
         sem_wait(&full);
         pthread_mutex_lock(&waitQueue_mutex);
@@ -141,4 +152,5 @@ void *wake_up()
         pthread_mutex_unlock(&waitQueue_mutex);
         sem_post(&empty);
     }
+    return NULL;
 }

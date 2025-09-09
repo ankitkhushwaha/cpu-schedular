@@ -8,7 +8,6 @@
 #include "process.h"
 #include "thread_op.h"
 
-extern STATUS;
 extern int global_counter;
 extern int TOTAL_PROCESS;
 extern int TERMINATED_PROCESS;

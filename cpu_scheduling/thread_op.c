@@ -12,32 +12,28 @@ void *init_queues()
     check(readyQueue != NULL, "readyQueue failed to create\n");
     waitQueue = queue_create();
     check(waitQueue != NULL, "waitQueue failed to create\n");
+    task_list = queue_create();
+    check(task_list != NULL, "task_list failed to create\n");
     return NULL;
 error:
     exit(EXIT_FAILURE);
 }
 
-void *add_to_readyQueue(burst_line *process_data)
+void *add_to_readyQueue(process_t *p)
 {
-    process_t *p = create_process();
-    check(p, "failed to create process");
-    p->process_d = process_data;
     enqueue(readyQueue, p);
-    return NULL;
-error:
-    perror("Failed to create process");
     return NULL;
 }
 
-void *add_to_waitQueue(burst_line *process_data)
+void *add_to_waitQueue(process_t *p)
 {
-    process_t *p = create_process();
-    check(p, "failed to create process");
-    p->process_d = process_data;
     enqueue(waitQueue, p);
     return NULL;
-error:
-    perror("Failed to create process");
+}
+
+void *add_to_taskList(process_t *p)
+{
+    enqueue(readyQueue, p);
     return NULL;
 }
 
