@@ -12,7 +12,9 @@ Queue *readyQueue;
 Queue *waitQueue;
 process_t *running_pd;
 int global_counter = 0;
+int T_PROCESS = 0;
 int TOTAL_PROCESS  = 0;
+int TERMINATED_PROCESS = 0;
 
 sem_t empty;
 sem_t full;
@@ -62,14 +64,14 @@ int main(int argc, char *argv[]){
     // Read the input file
     burst_data *data = read_burstfile(input_file);
     check(data != NULL, "Failed to read input file '%s'", input_file);
-
+    TOTAL_PROCESS = data->t_process;
     init_queues();
     
     pthread_t arrivalThread;
     // pthread_t cpuThread;
     // pthread_t ioThread;
 
-    sem_init(&empty, 0, data->t_process); 
+    sem_init(&empty, 0, TOTAL_PROCESS); 
     sem_init(&full, 0, 0);        
 
     // add_arrival_process(&data);
