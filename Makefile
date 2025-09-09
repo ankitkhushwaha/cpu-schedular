@@ -1,6 +1,6 @@
 CFLAGS = -Wall -g -Isrc -Icpu_scheduling 
 
-
+INCLUDES=$(wildcard src/*.h cpu_scheduling/*.h ./*.h)
 SOURCES=$(wildcard src/*.c cpu_scheduling/*.c)
 OBJECTS=$(patsubst %.c, %.o, $(SOURCES))
 
@@ -18,3 +18,6 @@ gdb:
 
 clean: $(TEST_OBJECTS)
 	rm -rf $(TEST_OBJECTS)
+
+format: $(INCLUDES) $(SOURCES)
+	clang-format -i $(INCLUDES) $(SOURCES)

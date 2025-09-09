@@ -1,12 +1,10 @@
+#include "queue.h"
+#include "dbg.h"
+#include "process.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "process.h"
-#include "dbg.h"
-#include "queue.h"
-#include "process.h"
 
-Queue *queue_create()
-{
+Queue *queue_create() {
     Queue *queue = (Queue *)calloc(1, sizeof(Queue));
     queue->len = 0;
     check_mem(queue);
@@ -15,8 +13,7 @@ error:
     exit(EXIT_FAILURE);
 }
 
-node *enqueue(Queue *queue, process_t *pd)
-{
+node *enqueue(Queue *queue, process_t *pd) {
     node *newnode = (node *)calloc(1, sizeof(node));
     check_mem(newnode);
 
@@ -25,8 +22,7 @@ node *enqueue(Queue *queue, process_t *pd)
     newnode->data = pd;
     check_mem(newnode);
 
-    if (!queue->front)
-    {
+    if (!queue->front) {
         queue->front = newnode;
         queue->len++;
         return queue->front;
@@ -42,16 +38,13 @@ error:
     return NULL;
 }
 
-process_t *dequeue(Queue *queue)
-{
+process_t *dequeue(Queue *queue) {
 
-    if (isEmpty(queue))
-    {
+    if (isEmpty(queue)) {
         printf("queue is empty\n");
         return NULL;
     }
-    if (!queue->front->next)
-    {        
+    if (!queue->front->next) {
         node *tnode = queue->front;
         queue->front = queue->rear = NULL;
         queue->len--;
@@ -70,24 +63,20 @@ process_t *dequeue(Queue *queue)
     return snode->data;
 }
 
-bool isEmpty(Queue *queue)
-{
+bool isEmpty(Queue *queue) {
     if (queue->len == 0)
         return true;
     else
         return false;
 }
 
-void queue_print(Queue *queue)
-{
-    if (isEmpty(queue))
-    {
+void queue_print(Queue *queue) {
+    if (isEmpty(queue)) {
         printf("queue is empty\n");
         return;
     }
     node *tnode;
-    Traverse(tnode, queue)
-    {
+    Traverse(tnode, queue) {
         // printf("%d ", tnode->data);
     }
     // printf("%d\n", tnode->data);
@@ -109,19 +98,19 @@ void queue_print(Queue *queue)
 //     dequeue(queue);
 //     dequeue(queue);
 //     queue_print(queue);
-    // dequeue(queue);
-    // list_RemoveFromEnd(list);
-    // list_print(list);
-    // list_add(list, 5);
+// dequeue(queue);
+// list_RemoveFromEnd(list);
+// list_print(list);
+// list_add(list, 5);
 
-    // int arr2[] = {2, 3, 5};
-    // validate_list(list, arr2, 3);
+// int arr2[] = {2, 3, 5};
+// validate_list(list, arr2, 3);
 
-    // list_RemoveFromFront(list);
-    // list_add(list, 1);
+// list_RemoveFromFront(list);
+// list_add(list, 1);
 
-    // int arr3[] = {3, 5, 1};
-    // validate_list(list, arr3, 3);
+// int arr3[] = {3, 5, 1};
+// validate_list(list, arr3, 3);
 
-    // list_print(list);
+// list_print(list);
 // }

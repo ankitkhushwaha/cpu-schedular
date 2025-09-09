@@ -1,20 +1,17 @@
-#include <stdio.h>
-#include <stdbool.h>
-#include <pthread.h>
-#include "dbg.h"
 #include "cpu_thread.h"
+#include "dbg.h"
 #include "thread_op.h"
+#include <pthread.h>
+#include <stdbool.h>
+#include <stdio.h>
 
-void *add_arrival_process(burst_data **data)
-{
+void *add_arrival_process(burst_data **data) {
     int j = 0;
     int t_process = (*data)->t_process;
     debug("total process: %d", t_process);
-    while (j != t_process)
-    {
+    while (j != t_process) {
         pthread_mutex_lock(&g_counter_mutex);
-        if ((*data)->b_data[j]->a_time == global_counter)
-        {
+        if ((*data)->b_data[j]->a_time == global_counter) {
             process_t *p = create_process();
             check(p, "failed to create process");
             p->process_d = (*data)->b_data[j];
@@ -34,37 +31,29 @@ error:
     return NULL;
 }
 
-bool _should_terminate(process_t *pd)
-{
-    if (pd->process_d->cpu_burst_size == 0)
-    {
+bool _should_terminate(process_t *pd) {
+    if (pd->process_d->cpu_burst_size == 0) {
         // only arrival time is given
         return true;
     }
-    if (pd->process_d->io_burst_size == 0)
-    {
-        if (pd->cpu_index < pd->process_d->cpu_burst_size)
-        {
+    if (pd->process_d->io_burst_size == 0) {
+        if (pd->cpu_index < pd->process_d->cpu_burst_size) {
             return false;
         }
         return true;
     }
 
     if ((pd->cpu_index < pd->process_d->cpu_burst_size) &&
-        (pd->io_index < pd->process_d->io_burst_size))
-    {
+        (pd->io_index < pd->process_d->io_burst_size)) {
         return false;
     }
     return true;
 }
 
-void *_process_cpu(process_t **pd)
-{
+void *_process_cpu(process_t **pd) {
     check(*pd, "Process given to use is NULL");
-    if ((*pd)->status == NEW)
-    {
-        if (_should_terminate(*pd))
-        {
+    if ((*pd)->status == NEW) {
+        if (_should_terminate(*pd)) {
             (*pd)->status = TEMINATED;
             return NULL;
         }
@@ -79,10 +68,8 @@ void *_process_cpu(process_t **pd)
         add_to_waitQueue(*pd);
         pthread_mutex_unlock(&waitQueue_mutex);
     }
-    if ((*pd)->status == READY)
-    {
-        if (_should_terminate(*pd))
-        {
+    if ((*pd)->status == READY) {
+        if (_should_terminate(*pd)) {
             (*pd)->status = TEMINATED;
             return NULL;
         }
@@ -102,11 +89,9 @@ error:
     return NULL;
 }
 
-void *_process_io(process_t **pd)
-{
+void *_process_io(process_t **pd) {
     check(*pd, "Process given to use is NULL");
-    if (_should_terminate(*pd))
-    {
+    if (_should_terminate(*pd)) {
         (*pd)->status = TEMINATED;
 
         return NULL;
@@ -127,10 +112,8 @@ error:
     return NULL;
 }
 
-void *schedular()
-{
-    while (TOTAL_PROCESS <= TERMINATED_PROCESS)
-    {
+void *schedular() {
+    while (TOTAL_PROCESS <= TERMINATED_PROCESS) {
         sem_wait(&empty);
         pthread_mutex_lock(&readyQueue_mutex);
         running_pd = remove_from_readyQueue();
@@ -141,10 +124,8 @@ void *schedular()
     return NULL;
 }
 
-void *wake_up()
-{
-    while (TOTAL_PROCESS <= TERMINATED_PROCESS)
-    {
+void *wake_up() {
+    while (TOTAL_PROCESS <= TERMINATED_PROCESS) {
         sem_wait(&full);
         pthread_mutex_lock(&waitQueue_mutex);
         process_t *sleeping_pd = remove_from_waitQueue();

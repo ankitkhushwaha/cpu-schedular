@@ -1,12 +1,12 @@
 #ifndef CPU_THREAD_H
 #define CPU_THREAD_H
 
-#include <pthread.h>
-#include <semaphore.h>
-#include "queue.h"
 #include "file.h"
 #include "process.h"
+#include "queue.h"
 #include "thread_op.h"
+#include <pthread.h>
+#include <semaphore.h>
 
 extern int global_counter;
 extern int TOTAL_PROCESS;

@@ -1,10 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "linkedList.h"
 #include "dbg.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-linkedList *list_create()
-{
+linkedList *list_create() {
     linkedList *list = (linkedList *)calloc(1, sizeof(linkedList));
     check_mem(list);
     return list;
@@ -12,14 +11,12 @@ error:
     exit(EXIT_FAILURE);
 }
 
-node *list_add(linkedList *list, int data)
-{
+node *list_add(linkedList *list, int data) {
     node *newnode = (node *)calloc(1, sizeof(node));
     newnode->data = data;
     check_mem(newnode);
 
-    if (!list->front)
-    {
+    if (!list->front) {
         list->front = newnode;
         return list->front;
     }
@@ -33,21 +30,15 @@ error:
     return NULL;
 }
 
-void list_print(linkedList *list)
-{
+void list_print(linkedList *list) {
     node *tnode;
-    Traverse(tnode, list)
-    {
-        printf("%d ", tnode->data);
-    }
+    Traverse(tnode, list) { printf("%d ", tnode->data); }
     printf("%d\n", tnode->data);
 }
 
-node *list_RemoveFromEnd(linkedList *list)
-{
+node *list_RemoveFromEnd(linkedList *list) {
     node *tnode;
-    Traverse(tnode, list)
-    {
+    Traverse(tnode, list) {
         if (tnode->next->next == NULL)
             break;
     }
@@ -59,29 +50,24 @@ node *list_RemoveFromEnd(linkedList *list)
     return list->front;
 }
 
-node *list_RemoveFromFront(linkedList *list){
+node *list_RemoveFromFront(linkedList *list) {
     node *tnode, *snode;
     tnode = snode = list->front;
 
     tnode = tnode->next;
     list->front = tnode;
-    
+
     free(snode);
     return list->front;
 }
 
-
 // For testing
-void validate_list(linkedList *list, int *arr, int size)
-{
+void validate_list(linkedList *list, int *arr, int size) {
     int i;
     node *tnode = list->front;
-    for (i = 0; i < size; i++)
-    {
-        if (arr[i] != tnode->data)
-        {
-            fprintf(stderr, "%dth index: %d != %d\n",
-                    i, arr[i], tnode->data);
+    for (i = 0; i < size; i++) {
+        if (arr[i] != tnode->data) {
+            fprintf(stderr, "%dth index: %d != %d\n", i, arr[i], tnode->data);
         }
         tnode = tnode->next;
     }
@@ -96,18 +82,18 @@ void validate_list(linkedList *list, int *arr, int size)
 
 //     int arr[] = {2, 3, 4};
 //     validate_list(list, arr, 3);
-    
+
 //     list_print(list);
 //     list_RemoveFromEnd(list);
 //     list_print(list);
 //     list_add(list, 5);
-    
+
 //     int arr2[] = {2, 3, 5};
 //     validate_list(list, arr2, 3);
-    
+
 //     list_RemoveFromFront(list);
 //     list_add(list, 1);
-    
+
 //     int arr3[] = {3, 5, 1};
 //     validate_list(list, arr3, 3);
 

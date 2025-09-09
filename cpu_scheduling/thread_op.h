@@ -1,8 +1,8 @@
 #ifndef THREAD_OP_H
 #define THREAD_OP_H
 
-#include "queue.h"
 #include "process.h"
+#include "queue.h"
 
 extern Queue *readyQueue;
 extern Queue *waitQueue;

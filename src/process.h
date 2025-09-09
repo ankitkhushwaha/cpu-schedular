@@ -1,23 +1,15 @@
 #ifndef PROCESS_H
 #define PROCESS_H
 
-#include <stdbool.h>
 #include "file.h"
+#include <stdbool.h>
 
 extern int TOTAL_PROCESS;
 extern int T_PROCESS;
 
-typedef enum
-{
-    NEW,
-    READY,
-    SLEEP,
-    RUNNIG,
-    TEMINATED
-}STATUS;
+typedef enum { NEW, READY, SLEEP, RUNNIG, TEMINATED } STATUS;
 
-typedef struct
-{
+typedef struct {
     int pid;
     burst_line *process_d;
     int cpu_index;
@@ -44,6 +36,5 @@ process_t *create_process();
 //     burst_line **b_data;
 //     int t_process;
 // } burst_data;
-
 
 #endif

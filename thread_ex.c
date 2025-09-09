@@ -1,20 +1,20 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define BUF_SIZE 3
 
 int buffer[BUF_SIZE];
 int in = 0, out = 0;
 
-sem_t empty;   // counts empty slots
-sem_t full;    // counts full slots
+sem_t empty; // counts empty slots
+sem_t full;  // counts full slots
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void *producer(void *arg) {
     for (int item = 0; item < 10; item++) {
-        sem_wait(&empty);               // wait for empty slot
+        sem_wait(&empty); // wait for empty slot
         pthread_mutex_lock(&mutex);
 
         buffer[in] = item;
@@ -22,14 +22,14 @@ void *producer(void *arg) {
         printf("Produced %d\n", item);
 
         pthread_mutex_unlock(&mutex);
-        sem_post(&full);                // signal filled slot
+        sem_post(&full); // signal filled slot
     }
     return NULL;
 }
 
 void *consumer(void *arg) {
     for (int i = 0; i < 10; i++) {
-        sem_wait(&full);                // wait for full slot
+        sem_wait(&full); // wait for full slot
         pthread_mutex_lock(&mutex);
 
         int item = buffer[out];
@@ -37,7 +37,7 @@ void *consumer(void *arg) {
         printf("Consumed %d\n", item);
 
         pthread_mutex_unlock(&mutex);
-        sem_post(&empty);               // signal empty slot
+        sem_post(&empty); // signal empty slot
     }
     return NULL;
 }
@@ -58,8 +58,6 @@ int main() {
     sem_destroy(&full);
     return 0;
 }
-
-
 
 // #include <pthread.h>
 // #include <stdio.h>
