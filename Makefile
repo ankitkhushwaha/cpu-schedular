@@ -1,23 +1,28 @@
-CFLAGS = -Wall -g -Isrc -Icpu_scheduling 
+CC = gcc
+CFLAGS = -Wall -g -Isrc -Icpu_scheduling
 
-INCLUDES=$(wildcard src/*.h cpu_scheduling/*.h ./*.h)
-SOURCES=$(wildcard src/*.c cpu_scheduling/*.c)
-OBJECTS=$(patsubst %.c, %.o, $(SOURCES))
+INCLUDES = $(wildcard src/*.h cpu_scheduling/*.h ./*.h)
+SOURCES  = $(wildcard src/*.c cpu_scheduling/*.c) main.c
+OBJECTS  = $(patsubst %.c, %.o, $(SOURCES))
 
-TEST_OBJECTS=$(wildcard src/*.o cpu_scheduling/*.o)
-# %.o: %.c
-# 	$(CC) $(CFLAGS) -c -o $@ $<
+TARGET = main
 
-# TARGET=build/main.o
+all: $(TARGET)
 
-all: $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) main.c -o main
+$(TARGET): $(OBJECTS)
+	$(CC) $(CFLAGS) $(OBJECTS) -o $(TARGET)
 
-gdb: all
-	gdb --args ./main test_cases/process1.dat
+%.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
 
-clean: $(TEST_OBJECTS)
-	rm -rf $(TEST_OBJECTS)
+gdb: $(TARGET)
+	gdb --args ./$(TARGET) test_cases/process1.dat
 
-format: $(INCLUDES) $(SOURCES)
+run: $(TARGET)
+	./$(TARGET) test_cases/process1.dat
+
+clean:
+	rm -f $(OBJECTS) $(TARGET)
+
+format:
 	clang-format -i $(INCLUDES) $(SOURCES)
