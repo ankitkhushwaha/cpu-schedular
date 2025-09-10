@@ -54,9 +54,9 @@ process_t *dequeue(Queue *queue) {
 
     node *tnode, *snode;
     tnode = snode = queue->front;
-    snode->next = NULL;
-
+    
     tnode = tnode->next;
+    snode->next = NULL;
     queue->front = tnode;
     queue->len--;
 

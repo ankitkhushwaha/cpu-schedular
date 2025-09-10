@@ -29,7 +29,7 @@ void *add_to_waitQueue(process_t *p) {
 }
 
 void *add_to_taskList(process_t *p) {
-    enqueue(readyQueue, p);
+    enqueue(task_list, p);
     return NULL;
 }
 

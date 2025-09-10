@@ -13,7 +13,7 @@ TEST_OBJECTS=$(wildcard src/*.o cpu_scheduling/*.o)
 all: $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) main.c -o main
 
-gdb:
+gdb: all
 	gdb --args ./main test_cases/process1.dat
 
 clean: $(TEST_OBJECTS)

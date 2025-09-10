@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 void *add_arrival_process(burst_data **data) {
     int j = 0;
@@ -20,7 +21,7 @@ void *add_arrival_process(burst_data **data) {
             add_to_taskList(p);
 
             sem_post(&full);
-            debug("process %d is added to ready queue", j);
+            debug("process %d is added to [ready,task_list] queue", j);
             j++;
         }
         global_counter++;
@@ -28,7 +29,7 @@ void *add_arrival_process(burst_data **data) {
     }
     return NULL;
 error:
-    return NULL;
+    exit(EXIT_FAILURE);
 }
 
 bool _should_terminate(process_t *pd) {
@@ -86,7 +87,7 @@ void *_process_cpu(process_t **pd) {
         pthread_mutex_unlock(&waitQueue_mutex);
     }
 error:
-    return NULL;
+    exit(EXIT_FAILURE);
 }
 
 void *_process_io(process_t **pd) {
@@ -107,13 +108,15 @@ void *_process_io(process_t **pd) {
     (*pd)->status = READY;
     add_to_readyQueue(*pd);
     pthread_mutex_unlock(&readyQueue_mutex);
+    
+    return NULL;
 
 error:
-    return NULL;
+    exit(EXIT_FAILURE);
 }
 
 void *schedular() {
-    while (TOTAL_PROCESS <= TERMINATED_PROCESS) {
+    while (TOTAL_PROCESS >= TERMINATED_PROCESS) {
         sem_wait(&empty);
         pthread_mutex_lock(&readyQueue_mutex);
         running_pd = remove_from_readyQueue();
@@ -125,7 +128,7 @@ void *schedular() {
 }
 
 void *wake_up() {
-    while (TOTAL_PROCESS <= TERMINATED_PROCESS) {
+    while (TOTAL_PROCESS >= TERMINATED_PROCESS) {
         sem_wait(&full);
         pthread_mutex_lock(&waitQueue_mutex);
         process_t *sleeping_pd = remove_from_waitQueue();

@@ -79,18 +79,19 @@ int main(int argc, char *argv[]) {
         perror("Failed to create arrival thread");
         return 1;
     }
-    if (pthread_create(&schedularThread, NULL, (void *)schedular, NULL) != 0) {
-        perror("Failed to create schedular thread");
-        return 1;
-    }
+    // if (pthread_create(&schedularThread, NULL, (void *)schedular, NULL) != 0) {
+    //     perror("Failed to create schedular thread");
+    //     return 1;
+    // }
 
-    if (pthread_create(&wakeupThread, NULL, (void *)wake_up, NULL) != 0) {
-        perror("Failed to create wake_up thread");
-        return 1;
-    }
+    // if (pthread_create(&wakeupThread, NULL, (void *)wake_up, NULL) != 0) {
+    //     perror("Failed to create wake_up thread");
+    //     return 1;
+    // }
     pthread_join(arrivalThread, NULL);
-    pthread_join(schedularThread, NULL);
-    pthread_join(wakeupThread, NULL);
+    schedular();
+    // pthread_join(schedularThread, NULL);
+    // pthread_join(wakeupThread, NULL);
 
     sem_destroy(&empty);
     sem_destroy(&full);
