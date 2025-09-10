@@ -23,7 +23,7 @@ node *enqueue(Queue *queue, process_t *pd) {
     check_mem(newnode);
 
     if (!queue->front) {
-        queue->front = newnode;
+        queue->front = queue->rear = newnode;
         queue->len++;
         return queue->front;
     }
@@ -41,26 +41,63 @@ error:
 process_t *dequeue(Queue *queue) {
 
     if (isEmpty(queue)) {
-        printf("queue is empty\n");
+        debug("queue is empty");
         return NULL;
     }
-    if (!queue->front->next) {
+    // Only 1 element
+    if (queue->front == queue->rear) {
         node *tnode = queue->front;
         queue->front = queue->rear = NULL;
         queue->len--;
-        free(tnode);
-        return NULL;
+        free(tnode->next);
+        return tnode->data;
     }
-
+    // Only 2 elements
+    if (queue->front->next == queue->rear) {
+        node *tnode = queue->rear;
+        queue->rear = queue->front;
+        queue->len--;
+        free(tnode->next);
+        return tnode->data;
+    }
     node *tnode, *snode;
     tnode = snode = queue->front;
-    
+
     tnode = tnode->next;
     snode->next = NULL;
     queue->front = tnode;
     queue->len--;
 
     return snode->data;
+}
+
+void *remove_node_by_pid(Queue *queue, int pid) {
+    if (isEmpty(queue)) {
+        debug("queue is empty");
+        return NULL;
+    }
+    // Only 1 element
+    if (queue->front == queue->rear) {
+        if (queue->front->data->pid == pid) {
+            node *tnode = queue->front;
+            queue->front = queue->rear = NULL;
+            queue->len--;
+            free(tnode->next);
+            return tnode->data;
+        }
+    }
+    node *tnode;
+    Traverse(tnode, queue) {
+        if (tnode->next->data->pid == pid) {
+            node *snode = tnode->next;
+            tnode->next = snode->next;
+            queue->len--;
+            free(snode);
+            return NULL;
+        }
+    }
+    debug("process %d not found", pid);
+    return NULL;
 }
 
 bool isEmpty(Queue *queue) {
@@ -72,7 +109,7 @@ bool isEmpty(Queue *queue) {
 
 void queue_print(Queue *queue) {
     if (isEmpty(queue)) {
-        printf("queue is empty\n");
+        debug("queue is empty");
         return;
     }
     node *tnode;

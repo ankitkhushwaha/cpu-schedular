@@ -17,4 +17,5 @@ process_t *remove_from_readyQueue();
 process_t *remove_from_waitQueue();
 
 void *process_pd(process_t *);
+process_t *find_process(Queue *, int);
 #endif

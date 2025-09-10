@@ -1,5 +1,6 @@
 #include "cpu_thread.h"
 #include "dbg.h"
+#include "queue.h"
 #include "thread_op.h"
 #include <pthread.h>
 #include <stdbool.h>
@@ -55,7 +56,13 @@ void *_process_cpu(process_t **pd) {
     check(*pd, "Process given to use is NULL");
     if ((*pd)->status == NEW) {
         if (_should_terminate(*pd)) {
+            debug("Process %d will be terminated", (*pd)->pid);
+            pthread_mutex_lock(&readyQueue_mutex);
+            remove_node_by_pid(readyQueue, (*pd)->pid);
+            pthread_mutex_unlock(&readyQueue_mutex);
+            TERMINATED_PROCESS++;
             (*pd)->status = TEMINATED;
+            debug("Process %d is terminated", (*pd)->pid);
             return NULL;
         }
         pthread_mutex_lock(&g_counter_mutex);
@@ -71,7 +78,13 @@ void *_process_cpu(process_t **pd) {
     }
     if ((*pd)->status == READY) {
         if (_should_terminate(*pd)) {
+            debug("Process %d will be terminated", (*pd)->pid);
+            pthread_mutex_lock(&readyQueue_mutex);
+            remove_node_by_pid(readyQueue, (*pd)->pid);
+            pthread_mutex_unlock(&readyQueue_mutex);
+            TERMINATED_PROCESS++;
             (*pd)->status = TEMINATED;
+            debug("Process %d is terminated", (*pd)->pid);
             return NULL;
         }
         // cpu work will be done
@@ -86,6 +99,7 @@ void *_process_cpu(process_t **pd) {
         add_to_waitQueue(*pd);
         pthread_mutex_unlock(&waitQueue_mutex);
     }
+    return NULL;
 error:
     exit(EXIT_FAILURE);
 }
@@ -93,8 +107,13 @@ error:
 void *_process_io(process_t **pd) {
     check(*pd, "Process given to use is NULL");
     if (_should_terminate(*pd)) {
+        debug("Process %d will be terminated", (*pd)->pid);
+        pthread_mutex_lock(&waitQueue_mutex);
+        remove_node_by_pid(waitQueue, (*pd)->pid);
+        pthread_mutex_unlock(&waitQueue_mutex);
+        TERMINATED_PROCESS++;
         (*pd)->status = TEMINATED;
-
+        debug("Process %d is terminated", (*pd)->pid);
         return NULL;
     }
     // io work will be done
@@ -108,33 +127,42 @@ void *_process_io(process_t **pd) {
     (*pd)->status = READY;
     add_to_readyQueue(*pd);
     pthread_mutex_unlock(&readyQueue_mutex);
-    
-    return NULL;
 
+    return NULL;
 error:
     exit(EXIT_FAILURE);
 }
 
 void *schedular() {
-    while (TOTAL_PROCESS >= TERMINATED_PROCESS) {
-        sem_wait(&empty);
+    int i = 0;
+    while (TOTAL_PROCESS > TERMINATED_PROCESS) {
+        debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d", TERMINATED_PROCESS,
+              TOTAL_PROCESS, i);
+        sem_wait(&full);
         pthread_mutex_lock(&readyQueue_mutex);
         running_pd = remove_from_readyQueue();
         _process_cpu(&running_pd);
         pthread_mutex_unlock(&readyQueue_mutex);
-        sem_post(&full);
+        sem_post(&empty);
+        // TERMINATED_PROCESS++;
+        i++;
     }
     return NULL;
 }
 
 void *wake_up() {
+    int i = 0;
     while (TOTAL_PROCESS >= TERMINATED_PROCESS) {
-        sem_wait(&full);
+        debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d", TERMINATED_PROCESS,
+              TOTAL_PROCESS, i);
+        sem_wait(&empty);
         pthread_mutex_lock(&waitQueue_mutex);
         process_t *sleeping_pd = remove_from_waitQueue();
         _process_io(&sleeping_pd);
         pthread_mutex_unlock(&waitQueue_mutex);
-        sem_post(&empty);
+        sem_post(&full);
+
+        i++;
     }
     return NULL;
 }

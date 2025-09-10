@@ -36,3 +36,13 @@ void *add_to_taskList(process_t *p) {
 process_t *remove_from_readyQueue() { return dequeue(readyQueue); }
 
 process_t *remove_from_waitQueue() { return dequeue(waitQueue); }
+
+process_t *find_process(Queue *queue, int pid) {
+    node *tnode;
+    Traverse(tnode, queue) {
+        if (tnode->data->pid == pid) {
+            return tnode->data;
+        }
+    }
+    return NULL;
+}

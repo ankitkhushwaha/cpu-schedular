@@ -21,5 +21,5 @@ Queue *queue_create();
 node *enqueue(Queue *, process_t *);
 process_t *dequeue(Queue *);
 bool isEmpty(Queue *);
-
+void *remove_node_by_pid(Queue *, int);
 #endif
