@@ -8,14 +8,13 @@ extern int TOTAL_PROCESS;
 extern int T_PROCESS;
 
 typedef enum { NEW, READY, SLEEP, RUNNIG, TEMINATED } STATUS;
-const char *STATUS_ARR[] = {"NEW", "READY", "SLEEP", "RUNNING", "TERMINATED"};
+extern const char *STATUS_ARR[5];
 
 typedef struct {
     int pid;
     burst_line *process_d;
     int cpu_index;
     int io_index;
-    // 0 = terminated, < 0 = sleep, > 0 = running
     STATUS status;
     int cpu_time;
     int io_time;

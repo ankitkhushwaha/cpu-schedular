@@ -74,6 +74,8 @@ void *_process_cpu(process_t **pd) {
         (*pd)->status = SLEEP;
         add_to_waitQueue(*pd);
         pthread_mutex_unlock(&waitQueue_mutex);
+
+        return NULL;
     }
     if ((*pd)->status == READY) {
         if (_should_terminate(*pd)) {
@@ -95,6 +97,8 @@ void *_process_cpu(process_t **pd) {
         (*pd)->status = SLEEP;
         add_to_waitQueue(*pd);
         pthread_mutex_unlock(&waitQueue_mutex);
+
+        return NULL;
     }
     debug("Process %d with invalid state: %s given", (*pd)->pid, STATUS_ARR[(*pd)->status]);
     return NULL;
@@ -123,7 +127,9 @@ void *_process_io(process_t **pd) {
         pthread_mutex_lock(&readyQueue_mutex);
         (*pd)->status = READY;
         add_to_readyQueue(*pd);
-        pthread_mutex_unlock(&readyQueue_mutex);    
+        pthread_mutex_unlock(&readyQueue_mutex);
+        
+        return NULL;
     }
     debug("Process %d with invalid state: %s given", (*pd)->pid, STATUS_ARR[(*pd)->status]);
     return NULL;
@@ -133,37 +139,40 @@ error:
 
 void *schedular() {
     int i = 0;
-    while (TERMINATED_PROCESS < TOTAL_PROCESS) {
-        debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d", TERMINATED_PROCESS,
-              TOTAL_PROCESS, i);
+    while (TERMINATED_PROCESS < 7) {
         sem_wait(&full);
+        debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d", TERMINATED_PROCESS,
+            TOTAL_PROCESS, i);
         pthread_mutex_lock(&readyQueue_mutex);
         running_pd = remove_from_readyQueue();
         if (running_pd) {
+            debug("Process %d is doing cpu with state: %s", running_pd->pid, STATUS_ARR[running_pd->status]);
             _process_cpu(&running_pd);
         }
         pthread_mutex_unlock(&readyQueue_mutex);
-        sem_post(&empty);
         i++;
+        sem_post(&empty);
     }
     return NULL;
 }
 
 void *wake_up() {
-    int i = 0;
-    while (TERMINATED_PROCESS < TOTAL_PROCESS) {
-        debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d", TERMINATED_PROCESS,
-              TOTAL_PROCESS, i);
+    int j = 0;
+    // TERMINATED_PROCESS < TOTAL_PROCESS
+    while (TERMINATED_PROCESS < 7) {
         sem_wait(&empty);
+        debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d", TERMINATED_PROCESS,
+              TOTAL_PROCESS, j);
         pthread_mutex_lock(&waitQueue_mutex);
         process_t *sleeping_pd = remove_from_waitQueue();
         if (sleeping_pd) {
+            debug("Process %d is doing io with state: %s", sleeping_pd->pid, STATUS_ARR[sleeping_pd->status]);
             _process_io(&sleeping_pd);
         }
         pthread_mutex_unlock(&waitQueue_mutex);
+        
+        j++;
         sem_post(&full);
-
-        i++;
     }
     return NULL;
 }

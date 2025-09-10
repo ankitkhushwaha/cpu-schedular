@@ -69,31 +69,29 @@ int main(int argc, char *argv[]) {
     init_queues();
 
     pthread_t arrivalThread, schedularThread, wakeupThread;
-    // pthread_t cpuThread;
-    // pthread_t ioThread;
-
-    sem_init(&empty, 0, TOTAL_PROCESS);
+    sem_init(&empty, 0, 0);
     sem_init(&full, 0, 0);
 
+    
     // add_arrival_process(&data);
     if (pthread_create(&arrivalThread, NULL, (void *)add_arrival_process, &data) != 0) {
         perror("Failed to create arrival thread");
         return 1;
     }
-    // if (pthread_create(&schedularThread, NULL, (void *)schedular, NULL) != 0) {
-    //     perror("Failed to create schedular thread");
-    //     return 1;
-    // }
+    if (pthread_create(&schedularThread, NULL, (void *)schedular, NULL) != 0) {
+        perror("Failed to create schedular thread");
+        return 1;
+    }
 
-    // if (pthread_create(&wakeupThread, NULL, (void *)wake_up, NULL) != 0) {
-    //     perror("Failed to create wake_up thread");
-    //     return 1;
-    // }
+    if (pthread_create(&wakeupThread, NULL, (void *)wake_up, NULL) != 0) {
+        perror("Failed to create wake_up thread");
+        return 1;
+    }
     pthread_join(arrivalThread, NULL);
     // schedular();
     // process_t *pd = remove_node_by_pid(readyQueue, 6);
-    // pthread_join(schedularThread, NULL);
-    // pthread_join(wakeupThread, NULL);
+    pthread_join(schedularThread, NULL);
+    pthread_join(wakeupThread, NULL);
     // wake_up();
     sem_destroy(&empty);
     sem_destroy(&full);
