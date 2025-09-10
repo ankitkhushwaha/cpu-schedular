@@ -8,6 +8,7 @@ extern int TOTAL_PROCESS;
 extern int T_PROCESS;
 
 typedef enum { NEW, READY, SLEEP, RUNNIG, TEMINATED } STATUS;
+const char *STATUS_ARR[] = {"NEW", "READY", "SLEEP", "RUNNING", "TERMINATED"};
 
 typedef struct {
     int pid;

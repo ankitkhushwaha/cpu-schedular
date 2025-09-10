@@ -71,7 +71,7 @@ process_t *dequeue(Queue *queue) {
     return snode->data;
 }
 
-void *remove_node_by_pid(Queue *queue, int pid) {
+process_t *remove_node_by_pid(Queue *queue, int pid) {
     if (isEmpty(queue)) {
         debug("queue is empty");
         return NULL;
@@ -85,15 +85,23 @@ void *remove_node_by_pid(Queue *queue, int pid) {
             free(tnode->next);
             return tnode->data;
         }
+        return NULL;
     }
-    node *tnode;
-    Traverse(tnode, queue) {
-        if (tnode->next->data->pid == pid) {
-            node *snode = tnode->next;
-            tnode->next = snode->next;
+    // if 1st element is matched
+    if (queue->front->data->pid == pid) {
+        node *tnode = queue->front;
+        queue->front = queue->front->next;
+        queue->len--;
+        return tnode->data;
+    }
+    node *prev_node;
+    Traverse(prev_node, queue) {
+        if (prev_node->next->data->pid == pid) {
+            node *mid_node, *tnode;
+            mid_node = tnode = prev_node->next;
+            prev_node->next = mid_node->next;
             queue->len--;
-            free(snode);
-            return NULL;
+            return tnode->data;
         }
     }
     debug("process %d not found", pid);

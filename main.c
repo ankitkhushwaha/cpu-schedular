@@ -2,6 +2,7 @@
 #include "dbg.h"
 #include "file.h"
 #include "process.h"
+#include "queue.h"
 #include "thread_op.h"
 #include <pthread.h>
 #include <semaphore.h>
@@ -89,10 +90,11 @@ int main(int argc, char *argv[]) {
     //     return 1;
     // }
     pthread_join(arrivalThread, NULL);
-    schedular();
+    // schedular();
+    // process_t *pd = remove_node_by_pid(readyQueue, 6);
     // pthread_join(schedularThread, NULL);
     // pthread_join(wakeupThread, NULL);
-
+    // wake_up();
     sem_destroy(&empty);
     sem_destroy(&full);
     return 0;

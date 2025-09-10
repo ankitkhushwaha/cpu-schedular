@@ -11,6 +11,7 @@
 extern int global_counter;
 extern int TOTAL_PROCESS;
 extern int TERMINATED_PROCESS;
+extern const char *STATUS_ARR[5];
 
 extern process_t *running_pd;
 extern sem_t empty;
