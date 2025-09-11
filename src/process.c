@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-const char *STATUS_ARR[5] = {"NEW", "READY", "SLEEP", "RUNNING", "TERMINATED"};
+const char *STATUS_ARR[7] = {"NEW", "READY", "SLEEP", "RUNNING", "TERMINATED", "UNDEFINED", NULL};
 
 process_t *create_process() {
     process_t *process = (process_t *)calloc(1, sizeof(process_t));

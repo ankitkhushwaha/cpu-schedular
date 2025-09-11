@@ -3,6 +3,8 @@
 #include "process.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <assert.h>
 
 Queue *queue_create() {
     Queue *queue = (Queue *)calloc(1, sizeof(Queue));
@@ -14,6 +16,7 @@ error:
 }
 
 node *enqueue(Queue *queue, process_t *pd) {
+    isValidQueue(queue);
     node *newnode = (node *)calloc(1, sizeof(node));
     check_mem(newnode);
 
@@ -39,7 +42,7 @@ error:
 }
 
 process_t *dequeue(Queue *queue) {
-
+    isValidQueue(queue);
     if (isEmpty(queue)) {
         debug("queue is empty");
         return NULL;
@@ -49,16 +52,19 @@ process_t *dequeue(Queue *queue) {
         node *tnode = queue->front;
         queue->front = queue->rear = NULL;
         queue->len--;
-        free(tnode->next);
-        return tnode->data;
+        process_t *data = tnode->data;
+        free(tnode);
+        return data;
     }
     // Only 2 elements
     if (queue->front->next == queue->rear) {
         node *tnode = queue->rear;
         queue->rear = queue->front;
+        queue->front->next = queue->rear;
         queue->len--;
-        free(tnode->next);
-        return tnode->data;
+        process_t *data = tnode->data;
+        free(tnode);
+        return data;
     }
     node *tnode, *snode;
     tnode = snode = queue->front;
@@ -68,10 +74,46 @@ process_t *dequeue(Queue *queue) {
     queue->front = tnode;
     queue->len--;
 
-    return snode->data;
+    process_t *data = snode->data;
+    free(snode);
+    return data;
 }
 
+// process_t *remove_node_by_pid(Queue *queue, int pid) {
+//     if (isEmpty(queue)) {
+//         debug("queue is empty");
+//         return NULL;
+//     }
+
+//     node *curr = queue->front;
+//     node *prev = NULL;
+
+//     while (curr) {
+//         if (curr->data->pid == pid) {
+//             // Update front/rear
+//             if (curr == queue->front)
+//                 queue->front = curr->next;
+//             else
+//                 prev->next = curr->next;
+
+//             if (curr == queue->rear)
+//                 queue->rear = prev;
+
+//             process_t *pdata = curr->data;
+//             free(curr);   // free the node
+//             queue->len--;
+//             return pdata;
+//         }
+//         prev = curr;
+//         curr = curr->next;
+//     }
+
+//     debug("process %d not found", pid);
+//     return NULL;
+// }
+
 process_t *remove_node_by_pid(Queue *queue, int pid) {
+    isValidQueue(queue);
     if (isEmpty(queue)) {
         debug("queue is empty");
         return NULL;
@@ -82,8 +124,9 @@ process_t *remove_node_by_pid(Queue *queue, int pid) {
             node *tnode = queue->front;
             queue->front = queue->rear = NULL;
             queue->len--;
-            free(tnode->next);
-            return tnode->data;
+            process_t *data = tnode->data;
+            free(tnode);
+            return data;
         }
         return NULL;
     }
@@ -92,7 +135,13 @@ process_t *remove_node_by_pid(Queue *queue, int pid) {
         node *tnode = queue->front;
         queue->front = queue->front->next;
         queue->len--;
-        return tnode->data;
+        process_t *data = tnode->data;
+        free(tnode);
+        return data;
+    }
+    if (queue->rear->data->pid == pid){
+        process_t *data = dequeue(queue);
+        return data;
     }
     node *prev_node;
     Traverse(prev_node, queue) {
@@ -101,7 +150,9 @@ process_t *remove_node_by_pid(Queue *queue, int pid) {
             mid_node = tnode = prev_node->next;
             prev_node->next = mid_node->next;
             queue->len--;
-            return tnode->data;
+            process_t *data = tnode->data;
+            free(tnode);
+            return data;
         }
     }
     debug("process %d not found", pid);
@@ -116,17 +167,45 @@ bool isEmpty(Queue *queue) {
 }
 
 void queue_print(Queue *queue) {
+    isValidQueue(queue);
     if (isEmpty(queue)) {
         debug("queue is empty");
         return;
     }
     node *tnode;
     Traverse(tnode, queue) {
-        // printf("%d ", tnode->data);
+        printf("%d ", tnode->data->pid);
     }
-    // printf("%d\n", tnode->data);
+    printf("%d\n", tnode->data->pid);
 }
 
+void isValidQueue(Queue *queue){
+    if (queue->len == 0){
+        assert(queue->front == NULL && queue->rear == NULL);
+        return;
+    }
+    
+    if (queue->len == 1){
+        assert(queue->front == queue->rear);
+        return;
+    }
+    else{
+        int len = 1;
+        node *tnode, *snode;
+        snode = queue->front->next;
+        Traverse(tnode, queue) {
+            assert(tnode != NULL);
+            assert(tnode->next == snode);
+            if (tnode != queue->rear)
+                snode = snode->next;
+            len++;
+        }
+        assert(tnode == queue->rear);
+        debug("len: %d, queue->len: %d", len, queue->len);
+        assert(len == queue->len);
+    }
+    debug("Queue is valid");
+}
 // int main(int argc, char *argv[])
 // {
 //     Queue *queue = queue_create();

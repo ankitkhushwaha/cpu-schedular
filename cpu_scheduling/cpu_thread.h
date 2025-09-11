@@ -7,17 +7,21 @@
 #include "thread_op.h"
 #include <pthread.h>
 #include <semaphore.h>
+#include <stdatomic.h>
 
-extern int global_counter;
 extern int TOTAL_PROCESS;
-extern int TERMINATED_PROCESS;
+extern atomic_int TERMINATED_PROCESS;
 
+extern atomic_int wait_counter;
+extern atomic_int ready_counter;
+
+extern bool is_emptyWaitQueue_t();
+extern bool is_emptyReadyQueue_t();
+
+extern process_t *sleeping_pd;
 extern process_t *running_pd;
-extern sem_t empty;
-extern sem_t full;
-extern pthread_mutex_t g_counter_mutex;
-extern pthread_mutex_t readyQueue_mutex;
-extern pthread_mutex_t waitQueue_mutex;
+extern sem_t wait_count;
+extern sem_t ready_count;
 
 void *schedular();
 void *wake_up();

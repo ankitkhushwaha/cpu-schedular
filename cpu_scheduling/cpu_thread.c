@@ -3,38 +3,42 @@
 #include "queue.h"
 #include "process.h"
 #include "thread_op.h"
-#include <pthread.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdatomic.h>
+
+atomic_int wait_counter = 0;
+atomic_int ready_counter = 0;
 
 void *add_arrival_process(burst_data **data) {
     int j = 0;
     int t_process = (*data)->t_process;
     debug("total process: %d", t_process);
     while (j != t_process) {
-        pthread_mutex_lock(&g_counter_mutex);
-        if ((*data)->b_data[j]->a_time == global_counter) {
+        if ((*data)->b_data[j]->a_time == read_global_counter()) {
             process_t *p = create_process();
             check(p, "failed to create process");
             p->process_d = (*data)->b_data[j];
 
             add_to_readyQueue(p);
             add_to_taskList(p);
-
-            sem_post(&full);
             debug("process %d is added to [ready,task_list] queue", j);
+
+            sem_post(&ready_count);
+            atomic_fetch_add(&ready_counter, 1);
+            debug("READY COUNT:%d POSTED from arrival.", 
+                atomic_load(&ready_counter));
             j++;
         }
-        global_counter++;
-        pthread_mutex_unlock(&g_counter_mutex);
+        update_global_counter(1);
     }
     return NULL;
 error:
     exit(EXIT_FAILURE);
 }
 
-bool _should_terminate(process_t *pd) {
+static bool _should_terminate(process_t *pd) {
     if (pd->process_d->cpu_burst_size == 0) {
         // only arrival time is given
         return true;
@@ -46,133 +50,177 @@ bool _should_terminate(process_t *pd) {
         return true;
     }
 
-    if ((pd->cpu_index < pd->process_d->cpu_burst_size) &&
-        (pd->io_index < pd->process_d->io_burst_size)) {
+    if (((pd->cpu_index < pd->process_d->cpu_burst_size) &&
+        (pd->io_index <= pd->process_d->io_burst_size)) ||
+
+        ((pd->cpu_index <= pd->process_d->cpu_burst_size) &&
+        (pd->io_index < pd->process_d->io_burst_size))
+    ) {
         return false;
     }
     return true;
 }
 
-void *_process_cpu(process_t **pd) {
+static STATUS _process_cpu(process_t **pd) {
     check(*pd, "Process given to use is NULL");
-    if ((*pd)->status == NEW) {
-        if (_should_terminate(*pd)) {
-            debug("Process %d will be terminated", (*pd)->pid);
-            remove_node_by_pid(readyQueue, (*pd)->pid);
-            TERMINATED_PROCESS++;
-            (*pd)->status = TEMINATED;
-            debug("Process %d is terminated", (*pd)->pid);
-            return NULL;
-        }
-        pthread_mutex_lock(&g_counter_mutex);
-        (*pd)->cpu_time = (*pd)->process_d->cpu_burst[0];
-        global_counter += (*pd)->process_d->cpu_burst[0];
-        (*pd)->cpu_index += 1;
-        pthread_mutex_unlock(&g_counter_mutex);
+    if (_should_terminate(*pd)) {
+        debug("Process %d will be terminated", (*pd)->pid);
+        update_term_counter(1);
+        (*pd)->status = TERMINATED;
+        debug("Process %d is terminated", (*pd)->pid);
+        return TERMINATED;
+    }
 
-        pthread_mutex_lock(&waitQueue_mutex);
+    if ((*pd)->status == NEW) {
+        (*pd)->cpu_time = (*pd)->process_d->cpu_burst[0];
+        update_global_counter((*pd)->process_d->cpu_burst[0]);
+        (*pd)->cpu_index += 1;
+
         (*pd)->status = SLEEP;
         add_to_waitQueue(*pd);
-        pthread_mutex_unlock(&waitQueue_mutex);
-
-        return NULL;
+        return SLEEP;
     }
     if ((*pd)->status == READY) {
-        if (_should_terminate(*pd)) {
-            debug("Process %d will be terminated", (*pd)->pid);
-            remove_node_by_pid(readyQueue, (*pd)->pid);
-            TERMINATED_PROCESS++;
-            (*pd)->status = TEMINATED;
-            debug("Process %d is terminated", (*pd)->pid);
-            return NULL;
-        }
         // cpu work will be done
-        pthread_mutex_lock(&g_counter_mutex);
         (*pd)->cpu_time += (*pd)->process_d->cpu_burst[(*pd)->cpu_index];
-        global_counter += (*pd)->process_d->cpu_burst[(*pd)->cpu_index];
+        update_global_counter((*pd)->process_d->cpu_burst[(*pd)->cpu_index]);
         (*pd)->cpu_index += 1;
-        pthread_mutex_unlock(&g_counter_mutex);
 
-        pthread_mutex_lock(&waitQueue_mutex);
         (*pd)->status = SLEEP;
         add_to_waitQueue(*pd);
-        pthread_mutex_unlock(&waitQueue_mutex);
-
-        return NULL;
+        return SLEEP;
     }
     debug("Process %d with invalid state: %s given", (*pd)->pid, STATUS_ARR[(*pd)->status]);
-    return NULL;
+    return UNDEFINED;
 error:
     exit(EXIT_FAILURE);
 }
 
-void *_process_io(process_t **pd) {
+static STATUS _process_io(process_t **pd) {
     check(*pd, "Process given to use is NULL");
     if (_should_terminate(*pd)) {
         debug("Process %d will be terminated", (*pd)->pid);
-        remove_node_by_pid(waitQueue, (*pd)->pid);
-        TERMINATED_PROCESS++;
-        (*pd)->status = TEMINATED;
+        update_term_counter(1);
+        (*pd)->status = TERMINATED;
         debug("Process %d is terminated", (*pd)->pid);
-        return NULL;
+        return TERMINATED;
     }
     if ((*pd)->status == SLEEP) {
         // io work will be done
-        pthread_mutex_lock(&g_counter_mutex);
         (*pd)->io_time += (*pd)->process_d->io_burst[(*pd)->io_index];
-        global_counter += (*pd)->process_d->io_burst[(*pd)->io_index];
+        update_global_counter((*pd)->process_d->io_burst[(*pd)->io_index]);
         (*pd)->io_index += 1;
-        pthread_mutex_unlock(&g_counter_mutex);
     
-        pthread_mutex_lock(&readyQueue_mutex);
         (*pd)->status = READY;
         add_to_readyQueue(*pd);
-        pthread_mutex_unlock(&readyQueue_mutex);
-        
-        return NULL;
+        return READY;
     }
     debug("Process %d with invalid state: %s given", (*pd)->pid, STATUS_ARR[(*pd)->status]);
-    return NULL;
+    return UNDEFINED;
 error:
     exit(EXIT_FAILURE);
 }
 
 void *schedular() {
     int i = 0;
-    while (TERMINATED_PROCESS < 7) {
-        sem_wait(&full);
-        debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d", TERMINATED_PROCESS,
-            TOTAL_PROCESS, i);
-        pthread_mutex_lock(&readyQueue_mutex);
+    while (1) {
+        // Check if all processes are done
+        if (all_processes_done()) {
+            debug("All processes completed. Exiting scheduler.");
+            break;
+        }
+
+        // Try to get a process from ready queue with a small timeout
+        struct timespec ts;
+        clock_gettime(CLOCK_REALTIME, &ts);
+        ts.tv_sec += 1; // 1 second timeout
+        
+        int sem_ret = sem_timedwait(&ready_count, &ts);
+        if (sem_ret == -1) {
+            if (errno == ETIMEDOUT) {
+                // Check again if all processes are done
+                if (all_processes_done()) {
+                    debug("All processes completed. Exiting scheduler.");
+                    break;
+                }
+                continue;
+            }
+            perror("sem_timedwait");
+            break;
+        }
+
+        atomic_fetch_sub(&ready_counter, 1);
+        debug("READY COUNT WAITED from schedular. READY COUNT:%d", 
+            atomic_load(&ready_counter));
+        debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d",
+             read_term_counter(), TOTAL_PROCESS, i);
+        
         running_pd = remove_from_readyQueue();
         if (running_pd) {
             debug("Process %d is doing cpu with state: %s", running_pd->pid, STATUS_ARR[running_pd->status]);
-            _process_cpu(&running_pd);
+            STATUS st = _process_cpu(&running_pd);
+            if (st == SLEEP) {
+                sem_post(&wait_count);
+                atomic_fetch_add(&wait_counter, 1);
+                debug("WAIT COUNT POSTED from schedular. WAIT COUNT:%d", 
+                    atomic_load(&wait_counter));
+            }
+        } else {
+            debug("BUG: No process in ready queue");
         }
-        pthread_mutex_unlock(&readyQueue_mutex);
         i++;
-        sem_post(&empty);
     }
     return NULL;
 }
 
 void *wake_up() {
     int j = 0;
-    // TERMINATED_PROCESS < TOTAL_PROCESS
-    while (TERMINATED_PROCESS < 7) {
-        sem_wait(&empty);
-        debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d", TERMINATED_PROCESS,
-              TOTAL_PROCESS, j);
-        pthread_mutex_lock(&waitQueue_mutex);
-        process_t *sleeping_pd = remove_from_waitQueue();
+    while (1) {
+        // Check if all processes are done
+        if (all_processes_done()) {
+            debug("All processes completed. Exiting wake_up.");
+            break;
+        }
+
+        // Try to get a process from wait queue with a small timeout
+        struct timespec ts;
+        clock_gettime(CLOCK_REALTIME, &ts);
+        ts.tv_sec += 1; // 1 second timeout
+        
+        int sem_ret = sem_timedwait(&wait_count, &ts);
+        if (sem_ret == -1) {
+            if (errno == ETIMEDOUT) {
+                // Check again if all processes are done
+                if (all_processes_done()) {
+                    debug("All processes completed. Exiting wake_up.");
+                    break;
+                }
+                continue;
+            }
+            perror("sem_timedwait");
+            break;
+        }
+
+        atomic_fetch_sub(&wait_counter, 1);
+        debug("WAIT COUNT WAITED from wake_up. WAIT COUNT:%d", 
+            atomic_load(&wait_counter));
+        debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d",
+             read_term_counter(), TOTAL_PROCESS, j);
+        
+        sleeping_pd = remove_from_waitQueue();
         if (sleeping_pd) {
             debug("Process %d is doing io with state: %s", sleeping_pd->pid, STATUS_ARR[sleeping_pd->status]);
-            _process_io(&sleeping_pd);
+            STATUS st = _process_io(&sleeping_pd);
+            if (st == READY) {
+                sem_post(&ready_count);
+                atomic_fetch_add(&ready_counter, 1);
+                debug("READY COUNT POSTED from wake_up. READY COUNT:%d", 
+                    atomic_load(&ready_counter));
+            }
+        } else {
+            debug("BUG: No process in wait queue");
         }
-        pthread_mutex_unlock(&waitQueue_mutex);
-        
         j++;
-        sem_post(&full);
     }
     return NULL;
 }

@@ -22,4 +22,5 @@ node *enqueue(Queue *, process_t *);
 process_t *dequeue(Queue *);
 bool isEmpty(Queue *);
 process_t *remove_node_by_pid(Queue *, int);
+void isValidQueue(Queue *);
 #endif
