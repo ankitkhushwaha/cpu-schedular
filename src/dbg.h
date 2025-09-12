@@ -13,7 +13,8 @@ pid_t gettid(void);
 #define debug(M, ...)
 #else
 #define debug(M, ...)                                                                              \
-    fprintf(stderr, "DEBUG %d:%s:%s:%d: " M "\n", gettid(), __FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__)
+    fprintf(stderr, "DEBUG %d:%s:%s:%d: " M "\n", gettid(), __FUNCTION__, __FILE__, __LINE__,      \
+            ##__VA_ARGS__)
 #endif
 
 #define clean_errno() (errno == 0 ? "None" : strerror(errno))

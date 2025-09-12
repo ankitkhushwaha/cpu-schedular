@@ -4,10 +4,9 @@
 #include "process.h"
 #include "queue.h"
 #include <pthread.h>
-#include <stdbool.h>
-#include <pthread.h>
 #include <semaphore.h>
 #include <stdatomic.h>
+#include <stdbool.h>
 
 extern sem_t wait_count;
 extern sem_t ready_count;

@@ -130,9 +130,9 @@ void *schedular() {
         // atomic_compare_exchange_strong(&TERMINATED_PROCESS, &TOTAL_PROCESS, &desired;)
         // Check if all processes are done
         // if (all_processes_done()) {
-            //     debug("All processes completed. Exiting scheduler.");
-            //     break;
-            // }
+        //     debug("All processes completed. Exiting scheduler.");
+        //     break;
+        // }
 
         // Try to get a process from ready queue with a small timeout
         // struct timespec ts;
@@ -165,13 +165,13 @@ void *schedular() {
             debug("Ready and wait queue is empty");
             break;
         }
-        if (sem_trywait(&ready_count) == 0){
+        if (sem_trywait(&ready_count) == 0) {
             debug("READY COUNT WAITED Schedular");
             debug("READY COUNT:%d, wait count: %d", atomic_load(&ready_counter),
                   atomic_load(&wait_counter));
             // debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d",
             //      read_term_counter(), TOTAL_PROCESS, i);
-    
+
             running_pd = remove_from_readyQueue();
             if (running_pd) {
                 debug("Process %d is doing cpu with state: %s", running_pd->pid,
@@ -229,7 +229,7 @@ void *wake_up() {
         //     debug("wait Queue is empty");
         //     continue;
         // }
-        if (sem_trywait(&wait_count) == 0){
+        if (sem_trywait(&wait_count) == 0) {
             // debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d",
             sleeping_pd = remove_from_waitQueue();
             if (sleeping_pd) {

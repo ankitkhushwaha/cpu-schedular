@@ -7,7 +7,7 @@
 extern int TOTAL_PROCESS;
 extern int T_PROCESS;
 
-typedef enum { NEW, READY, SLEEP, RUNNIG, TERMINATED, UNDEFINED} STATUS;
+typedef enum { NEW, READY, SLEEP, RUNNIG, TERMINATED, UNDEFINED } STATUS;
 extern const char *STATUS_ARR[7];
 
 typedef struct {

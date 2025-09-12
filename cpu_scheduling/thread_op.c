@@ -3,12 +3,11 @@
 #include "file.h"
 #include "process.h"
 #include "queue.h"
-#include <stdio.h>
-#include <stdlib.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <stdatomic.h>
-
+#include <stdio.h>
+#include <stdlib.h>
 
 void *init_queues() {
     readyQueue = queue_create();
@@ -66,7 +65,7 @@ bool update_term_counter(int val) {
     return true;
 }
 
-int read_term_counter(){
+int read_term_counter() {
     // pthread_mutex_lock(&term_counter_mutex);
     return atomic_load(&TERMINATED_PROCESS);
     // pthread_mutex_unlock(&term_counter_mutex);
@@ -93,44 +92,43 @@ bool is_emptyTaskList_t() {
     return val;
 }
 
-process_t *remove_from_readyQueue() { 
+process_t *remove_from_readyQueue() {
     pthread_mutex_lock(&readyQueue_mutex);
-    process_t *pd = dequeue(readyQueue); 
+    process_t *pd = dequeue(readyQueue);
     pthread_mutex_unlock(&readyQueue_mutex);
 
     return pd;
 }
 
-process_t *remove_from_waitQueue() { 
+process_t *remove_from_waitQueue() {
     pthread_mutex_lock(&waitQueue_mutex);
-    process_t *pd = dequeue(waitQueue); 
+    process_t *pd = dequeue(waitQueue);
     pthread_mutex_unlock(&waitQueue_mutex);
 
     return pd;
 }
 
-process_t *remove_node_by_pid_t(Queue *queue, int pid, pthread_mutex_t *mutex){
+process_t *remove_node_by_pid_t(Queue *queue, int pid, pthread_mutex_t *mutex) {
     pthread_mutex_lock(mutex);
-    process_t *pd = remove_node_by_pid(queue, pid); 
+    process_t *pd = remove_node_by_pid(queue, pid);
     pthread_mutex_unlock(mutex);
     return pd;
 }
 
-int read_wait_sem_value_t(){
+int read_wait_sem_value_t() {
     int tmp;
     sem_getvalue(&wait_count, &tmp);
     return tmp;
 }
 
-int read_ready_sem_value_t(){
+int read_ready_sem_value_t() {
     int tmp;
     sem_getvalue(&ready_count, &tmp);
     return tmp;
 }
 
 bool all_processes_done() {
-    return (read_term_counter() >= TOTAL_PROCESS) && 
-           is_emptyReadyQueue_t() && 
+    return (read_term_counter() >= TOTAL_PROCESS) && is_emptyReadyQueue_t() &&
            is_emptyWaitQueue_t();
 }
 

@@ -1,10 +1,10 @@
 #include "queue.h"
 #include "dbg.h"
 #include "process.h"
+#include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
-#include <assert.h>
 
 Queue *queue_create() {
     Queue *queue = (Queue *)calloc(1, sizeof(Queue));
@@ -141,7 +141,7 @@ process_t *remove_node_by_pid(Queue *queue, int pid) {
         free(tnode);
         return data;
     }
-    if (queue->rear->data->pid == pid){
+    if (queue->rear->data->pid == pid) {
         process_t *data = dequeue(queue);
         return data;
     }
@@ -175,23 +175,20 @@ void queue_print(Queue *queue) {
         return;
     }
     node *tnode;
-    Traverse(tnode, queue) {
-        printf("%d ", tnode->data->pid);
-    }
+    Traverse(tnode, queue) { printf("%d ", tnode->data->pid); }
     printf("%d\n", tnode->data->pid);
 }
 
-void isValidQueue(Queue *queue){
-    if (queue->len == 0){
+void isValidQueue(Queue *queue) {
+    if (queue->len == 0) {
         assert(queue->front == NULL && queue->rear == NULL);
         return;
     }
-    
-    if (queue->len == 1){
+
+    if (queue->len == 1) {
         assert(queue->front == queue->rear);
         return;
-    }
-    else{
+    } else {
         int len = 1;
         node *tnode, *snode;
         snode = queue->front->next;

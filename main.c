@@ -6,9 +6,9 @@
 #include "thread_op.h"
 #include <pthread.h>
 #include <semaphore.h>
+#include <stdatomic.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdatomic.h>
 
 Queue *readyQueue;
 Queue *waitQueue;
@@ -79,7 +79,6 @@ int main(int argc, char *argv[]) {
     sem_init(&wait_count, 0, 0);
     sem_init(&ready_count, 0, 0);
 
-    
     // add_arrival_process(&data);
     // pthread_create(&arrivalThread, NULL, (void *)add_arrival_process, &data);
     if (pthread_create(&arrivalThread, NULL, (void *)add_arrival_process, &data) != 0) {
@@ -114,18 +113,18 @@ int main(int argc, char *argv[]) {
     // isValidQueue(readyQueue);
     // process_t *pd1 = remove_node_by_pid(readyQueue, 1);
     // isValidQueue(readyQueue);
-    
+
     pthread_join(wakeupThread, NULL);
     pthread_join(schedularThread, NULL);
     // wake_up();
-    
+
     sem_destroy(&wait_count);
     sem_destroy(&ready_count);
     pthread_mutex_destroy(&readyQueue_mutex);
     pthread_mutex_destroy(&waitQueue_mutex);
     pthread_mutex_destroy(&task_list_mutex);
     pthread_mutex_destroy(&term_counter_mutex);
-    
+
     return 0;
 error:
     return 1;
