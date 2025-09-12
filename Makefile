@@ -21,8 +21,8 @@ run: $(TARGET)
 	TSAN_OPTIONS=second_deadlock_stack=1 ./$(TARGET) test_cases/process1.dat
 
 clean:
-	rm -f $(OBJECTS) $(TARGET)
+	rm -f $(OBJECTS) $(TARGET) a.out
 
 format:
-	clang-format -i $(INCLUDES) $(SOURCES)
+	clang-format -i $(INCLUDES) $(SOURCES) 
 

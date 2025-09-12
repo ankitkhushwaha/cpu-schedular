@@ -229,29 +229,28 @@ void *wake_up() {
         //     debug("wait Queue is empty");
         //     continue;
         // }
-        sem_wait(&wait_count);
-        debug("READY COUNT:%d, wait count: %d", atomic_load(&ready_counter),
-              atomic_load(&wait_counter));
-        // debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d",
+        if (sem_trywait(&wait_count) == 0){
+            // debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d",
+            sleeping_pd = remove_from_waitQueue();
+            if (sleeping_pd) {
+                debug("Process %d is doing io with state: %s", sleeping_pd->pid,
+                      STATUS_ARR[sleeping_pd->status]);
+                STATUS st = _process_io(&sleeping_pd);
+                if (st == READY) {
+                    // sem_post(&ready_count);
+                    // atomic_fetch_add(&ready_counter, 1);
+                    debug("READY COUNT:%d, wait count: %d", atomic_load(&ready_counter),
+                          atomic_load(&wait_counter));
+                }
+                if (st == TERMINATED) {
+                    debug("TERMINATED process: %d ", atomic_load(&TERMINATED_PROCESS));
+                }
+            } else {
+                debug("BUG: No process in wait queue");
+            }
+        }
         //      read_term_counter(), TOTAL_PROCESS, j);
 
-        sleeping_pd = remove_from_waitQueue();
-        if (sleeping_pd) {
-            debug("Process %d is doing io with state: %s", sleeping_pd->pid,
-                  STATUS_ARR[sleeping_pd->status]);
-            STATUS st = _process_io(&sleeping_pd);
-            if (st == READY) {
-                // sem_post(&ready_count);
-                // atomic_fetch_add(&ready_counter, 1);
-                debug("READY COUNT:%d, wait count: %d", atomic_load(&ready_counter),
-                      atomic_load(&wait_counter));
-            }
-            if (st == TERMINATED) {
-                debug("TERMINATED process: %d ", atomic_load(&TERMINATED_PROCESS));
-            }
-        } else {
-            debug("BUG: No process in wait queue");
-        }
         j++;
     }
     debug("wakeup exiting\n");
