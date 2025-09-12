@@ -42,17 +42,13 @@ void print_usage(const char *prog_name) {
 
 // void init_scheduler(const char *scheduler) {
 //     if (strcmp(scheduler, "fcfs") == 0) {
-//         // printf("Initializing FCFS (First-Come-First-Serve)
-//         scheduler...\n"); init_fcfs();
+//         init_fcfs();
 //     } else if (strcmp(scheduler, "sjf") == 0) {
-//         // printf("Initializing SJF (Shortest Job First) scheduler...\n");
 //         init_sjf();
 //     } else if (strcmp(scheduler, "priority") == 0) {
-//         // printf("Initializing Priority scheduler (preemptive)...\n");
 //         init_priority();
 //     } else if (strcmp(scheduler, "rr") == 0) {
-//         // printf("Initializing Round Robin scheduler (time quantum:
-//         4)...\n"); init_rr();
+//         init_rr();
 //     } else {
 //         printf("Error: Unknown scheduler '%s'\n\n", scheduler);
 //         print_usage("./cpu_scheduler");
