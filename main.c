@@ -115,10 +115,11 @@ int main(int argc, char *argv[]) {
     // isValidQueue(readyQueue);
     // process_t *pd1 = remove_node_by_pid(readyQueue, 1);
     // isValidQueue(readyQueue);
-
-    pthread_join(schedularThread, NULL);
+    
     pthread_join(wakeupThread, NULL);
+    pthread_join(schedularThread, NULL);
     // wake_up();
+    
     sem_destroy(&wait_count);
     sem_destroy(&ready_count);
     pthread_mutex_destroy(&g_counter_mutex);
