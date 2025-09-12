@@ -26,7 +26,6 @@ extern void isValidQueue(Queue *queue);
 
 sem_t wait_count;
 sem_t ready_count;
-pthread_mutex_t g_counter_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t readyQueue_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t waitQueue_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t task_list_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -80,9 +79,9 @@ int main(int argc, char *argv[]) {
     sem_init(&wait_count, 0, 0);
     sem_init(&ready_count, 0, 0);
 
-    isValidQueue(readyQueue);
     
     // add_arrival_process(&data);
+    // pthread_create(&arrivalThread, NULL, (void *)add_arrival_process, &data);
     if (pthread_create(&arrivalThread, NULL, (void *)add_arrival_process, &data) != 0) {
         perror("Failed to create arrival thread");
         return 1;
@@ -122,7 +121,6 @@ int main(int argc, char *argv[]) {
     
     sem_destroy(&wait_count);
     sem_destroy(&ready_count);
-    pthread_mutex_destroy(&g_counter_mutex);
     pthread_mutex_destroy(&readyQueue_mutex);
     pthread_mutex_destroy(&waitQueue_mutex);
     pthread_mutex_destroy(&task_list_mutex);

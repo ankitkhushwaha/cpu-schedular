@@ -18,6 +18,9 @@ extern atomic_int ready_counter;
 extern bool is_emptyWaitQueue_t();
 extern bool is_emptyReadyQueue_t();
 
+extern sem_t wait_count;
+extern sem_t ready_count;
+
 extern process_t *sleeping_pd;
 extern process_t *running_pd;
 extern sem_t wait_count;

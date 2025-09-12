@@ -18,7 +18,6 @@ extern Queue *task_list;
 extern atomic_int global_counter;
 extern atomic_int TERMINATED_PROCESS;
 
-extern pthread_mutex_t g_counter_mutex;
 extern pthread_mutex_t readyQueue_mutex;
 extern pthread_mutex_t waitQueue_mutex;
 extern pthread_mutex_t task_list_mutex;
@@ -33,7 +32,7 @@ void *update_global_counter(int);
 int read_global_counter();
 
 bool update_term_counter(int);
-int read_term_counter();
+// int read_term_counter();
 
 bool is_emptyReadyQueue_t();
 bool is_emptyWaitQueue_t();

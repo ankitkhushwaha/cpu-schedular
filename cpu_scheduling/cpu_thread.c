@@ -1,12 +1,12 @@
 #include "cpu_thread.h"
 #include "dbg.h"
-#include "queue.h"
 #include "process.h"
+#include "queue.h"
 #include "thread_op.h"
+#include <stdatomic.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdatomic.h>
 
 atomic_int wait_counter = 0;
 atomic_int ready_counter = 0;
@@ -23,19 +23,18 @@ void *add_arrival_process(burst_data **data) {
 
             add_to_readyQueue(p);
             add_to_taskList(p);
-            debug("process %d is added to [ready,task_list] queue", j);
+            debug("process %d is added to [ready,task_list] queue at time: %d", j,
+                  read_global_counter());
 
             sem_post(&ready_count);
             atomic_fetch_add(&ready_counter, 1);
-            debug("READY COUNT:%d POSTED from arrival.", 
-                atomic_load(&ready_counter));
+            debug("READY COUNT:%d POSTED from arrival.", atomic_load(&ready_counter));
             j++;
         }
         update_global_counter(1);
-        sem_post(&ready_count);
-        sem_post(&wait_count);
         // sem_post(&ready_counter);
     }
+    fprintf(stderr, "arrival thread exiting\n");
     return NULL;
 error:
     exit(EXIT_FAILURE);
@@ -54,11 +53,10 @@ static bool _should_terminate(process_t *pd) {
     }
 
     if (((pd->cpu_index < pd->process_d->cpu_burst_size) &&
-        (pd->io_index <= pd->process_d->io_burst_size)) ||
+         (pd->io_index <= pd->process_d->io_burst_size)) ||
 
         ((pd->cpu_index <= pd->process_d->cpu_burst_size) &&
-        (pd->io_index < pd->process_d->io_burst_size))
-    ) {
+         (pd->io_index < pd->process_d->io_burst_size))) {
         return false;
     }
     return true;
@@ -92,7 +90,7 @@ static STATUS _process_cpu(process_t **pd) {
 
         (*pd)->status = SLEEP;
         add_to_waitQueue(*pd);
-        return (*pd)->status;
+        return SLEEP;
     }
     debug("Process %d with invalid state: %s given", (*pd)->pid, STATUS_ARR[(*pd)->status]);
     return UNDEFINED;
@@ -115,66 +113,79 @@ static STATUS _process_io(process_t **pd) {
         (*pd)->io_time += (*pd)->process_d->io_burst[(*pd)->io_index];
         update_global_counter((*pd)->process_d->io_burst[(*pd)->io_index]);
         (*pd)->io_index += 1;
-    
+
         (*pd)->status = READY;
         add_to_readyQueue(*pd);
         return READY;
     }
     debug("Process %d with invalid state: %s given", (*pd)->pid, STATUS_ARR[(*pd)->status]);
     return UNDEFINED;
-    error:
+error:
     exit(EXIT_FAILURE);
 }
 
 void *schedular() {
     int i = 0;
+    // int desired = TOTAL_PROCESS;
     while (atomic_load(&TERMINATED_PROCESS) < TOTAL_PROCESS) {
         i++;
-        debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d", atomic_load(&TERMINATED_PROCESS), TOTAL_PROCESS);
+        // atomic_compare_exchange_strong(&TERMINATED_PROCESS, &TOTAL_PROCESS, &desired;)
         // Check if all processes are done
         // if (all_processes_done()) {
-        //     debug("All processes completed. Exiting scheduler.");
+            //     debug("All processes completed. Exiting scheduler.");
+            //     break;
+            // }
+
+        // Try to get a process from ready queue with a small timeout
+        // struct timespec ts;
+        // clock_gettime(CLOCK_REALTIME, &ts);
+        // ts.tv_sec += 1; // 1 second timeout
+
+        // int sem_ret = sem_timedwait(&ready_count, &ts);
+        // if (sem_ret == -1) {
+        //     if (errno == ETIMEDOUT) {
+        //         // Check again if all processes are done
+        //         // if (all_processes_done()) {
+        //         //     debug("All processes completed. Exiting scheduler.");
+        //         //     break;
+        //         // }
+        //         continue;
+        //     }
+        //     perror("sem_timedwait");
         //     break;
         // }
-
-        // // Try to get a process from ready queue with a small timeout
-        struct timespec ts;
-        clock_gettime(CLOCK_REALTIME, &ts);
-        ts.tv_sec += 1; // 1 second timeout
-        
-        int sem_ret = sem_timedwait(&ready_count, &ts);
-        if (sem_ret == -1) {
-            if (errno == ETIMEDOUT) {
-                // Check again if all processes are done
-                if (all_processes_done()) {
-                    debug("All processes completed. Exiting scheduler.");
-                    break;
-                }
-                continue;
-            }
-            perror("sem_timedwait");
+        if (atomic_load(&TERMINATED_PROCESS) >= TOTAL_PROCESS) {
+            debug("BReaking TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d",
+                  atomic_load(&TERMINATED_PROCESS), TOTAL_PROCESS);
             break;
+        } else {
+            debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d", atomic_load(&TERMINATED_PROCESS),
+                  TOTAL_PROCESS);
         }
-        // if (atomic_load(&TERMINATED_PROCESS) >= TOTAL_PROCESS) break;
-        // sem_wait(&ready_count);
+        // if (!is_emptyReadyQueue_t() && is_emptyWaitQueue_t()) {
+        //     debug("ready Queue is empty");
+        //     continue;
+        // }
+        sem_wait(&ready_count);
         debug("READY COUNT WAITED Schedular");
-        // atomic_fetch_sub(&ready_counter, 1);
-        // debug("READY COUNT WAITED from schedular. READY COUNT:%d", 
-        //     atomic_load(&ready_counter));
+        atomic_fetch_sub(&ready_counter, 1);
+        debug("READY COUNT:%d, wait count: %d", atomic_load(&ready_counter),
+              atomic_load(&wait_counter));
         // debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d",
         //      read_term_counter(), TOTAL_PROCESS, i);
-        
+
         running_pd = remove_from_readyQueue();
         if (running_pd) {
-            debug("Process %d is doing cpu with state: %s", running_pd->pid, STATUS_ARR[running_pd->status]);
+            debug("Process %d is doing cpu with state: %s", running_pd->pid,
+                  STATUS_ARR[running_pd->status]);
             STATUS st = _process_cpu(&running_pd);
             if (st == SLEEP) {
                 sem_post(&wait_count);
                 atomic_fetch_add(&wait_counter, 1);
-                debug("WAIT COUNT POSTED from schedular. WAIT COUNT:%d", 
-                    atomic_load(&wait_counter));
+                debug("READY COUNT:%d, wait count: %d", atomic_load(&ready_counter),
+                      atomic_load(&wait_counter));
             }
-            if (st == TERMINATED){
+            if (st == TERMINATED) {
                 debug("TERMINATED process: %d ", atomic_load(&TERMINATED_PROCESS));
             }
         } else {
@@ -187,54 +198,57 @@ void *schedular() {
 
 void *wake_up() {
     int j = 0;
-    while (1) {
-        debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d", atomic_load(&TERMINATED_PROCESS), TOTAL_PROCESS);
-        if (atomic_load(&TERMINATED_PROCESS) == TOTAL_PROCESS){
-            break;
-        }
+    while (atomic_load(&TERMINATED_PROCESS) < TOTAL_PROCESS) {
+        debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d", atomic_load(&TERMINATED_PROCESS),
+              TOTAL_PROCESS);
         // Check if all processes are done
         // if (all_processes_done()) {
         //     debug("All processes completed. Exiting wake_up.");
         //     break;
-        // }
-
+        // if (atomic_load(&TERMINATED_PROCESS) >= TOTAL_PROCESS)
+        //     break;
         // // Try to get a process from wait queue with a small timeout
-        struct timespec ts;
-        clock_gettime(CLOCK_REALTIME, &ts);
-        ts.tv_sec += 1; // 1 second timeout
-        
-        int sem_ret = sem_timedwait(&wait_count, &ts);
-        if (sem_ret == -1) {
-            if (errno == ETIMEDOUT) {
-                // Check again if all processes are done
-                if (all_processes_done()) {
-                    debug("All processes completed. Exiting wake_up.");
-                    break;
-                }
-                continue;
-            }
-            perror("sem_timedwait");
-            break;
-        }
-        // if (atomic_load(&TERMINATED_PROCESS) >= TOTAL_PROCESS) break;
-        // sem_wait(&wait_count);
+        // struct timespec ts;
+        // clock_gettime(CLOCK_REALTIME, &ts);
+        // ts.tv_sec += 1; // 1 second timeout
+
+        // int sem_ret = sem_timedwait(&wait_count, &ts);
+        // if (sem_ret == -1) {
+        //     if (errno == ETIMEDOUT) {
+        //         // Check again if all processes are done
+        //         // if (all_processes_done()) {
+        //         //     debug("All processes completed. Exiting wake_up.");
+        //         //     break;
+        //         // }
+        //         continue;
+        //     }
+        //     perror("sem_timedwait");
+        //     break;
+        // }
+        // }
+        // if (!is_emptyWaitQueue_t() && is_emptyReadyQueue_t()) {
+        //     debug("wait Queue is empty");
+        //     continue;
+        // }
+        sem_wait(&wait_count);
         atomic_fetch_sub(&wait_counter, 1);
-        debug("WAIT COUNT WAITED from wake_up. WAIT COUNT:%d", 
-            atomic_load(&wait_counter));
+        debug("READY COUNT:%d, wait count: %d", atomic_load(&ready_counter),
+              atomic_load(&wait_counter));
         // debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d",
         //      read_term_counter(), TOTAL_PROCESS, j);
-        
+
         sleeping_pd = remove_from_waitQueue();
         if (sleeping_pd) {
-            debug("Process %d is doing io with state: %s", sleeping_pd->pid, STATUS_ARR[sleeping_pd->status]);
+            debug("Process %d is doing io with state: %s", sleeping_pd->pid,
+                  STATUS_ARR[sleeping_pd->status]);
             STATUS st = _process_io(&sleeping_pd);
             if (st == READY) {
                 sem_post(&ready_count);
                 atomic_fetch_add(&ready_counter, 1);
-                debug("READY COUNT POSTED from wake_up. READY COUNT:%d", 
-                    atomic_load(&ready_counter));
+                debug("READY COUNT:%d, wait count: %d", atomic_load(&ready_counter),
+                      atomic_load(&wait_counter));
             }
-            if (st == TERMINATED){
+            if (st == TERMINATED) {
                 debug("TERMINATED process: %d ", atomic_load(&TERMINATED_PROCESS));
             }
         } else {

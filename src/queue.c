@@ -60,7 +60,9 @@ process_t *dequeue(Queue *queue) {
     if (queue->front->next == queue->rear) {
         node *tnode = queue->rear;
         queue->rear = queue->front;
-        queue->front->next = queue->rear;
+        queue->front->next = NULL;
+        queue->rear->next = NULL;
+
         queue->len--;
         process_t *data = tnode->data;
         free(tnode);
@@ -196,6 +198,7 @@ void isValidQueue(Queue *queue){
         Traverse(tnode, queue) {
             assert(tnode != NULL);
             assert(tnode->next == snode);
+            assert(tnode->next != tnode);
             if (tnode != queue->rear)
                 snode = snode->next;
             len++;
