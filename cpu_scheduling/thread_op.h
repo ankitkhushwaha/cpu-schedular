@@ -32,7 +32,7 @@ void *update_global_counter(int);
 int read_global_counter();
 
 bool update_term_counter(int);
-// int read_term_counter();
+int read_term_counter();
 
 bool is_emptyReadyQueue_t();
 bool is_emptyWaitQueue_t();

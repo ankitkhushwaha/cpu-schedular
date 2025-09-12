@@ -16,7 +16,7 @@ void *add_arrival_process(burst_data **data) {
     int t_process = (*data)->t_process;
     debug("total process: %d", t_process);
     while (j != t_process) {
-        if ((*data)->b_data[j]->a_time == read_global_counter()) {
+        if ((*data)->b_data[j]->a_time <= read_global_counter()) {
             process_t *p = create_process();
             check(p, "failed to create process");
             p->process_d = (*data)->b_data[j];
@@ -25,14 +25,11 @@ void *add_arrival_process(burst_data **data) {
             add_to_taskList(p);
             debug("process %d is added to [ready,task_list] queue at time: %d", j,
                   read_global_counter());
-
             sem_post(&ready_count);
-            atomic_fetch_add(&ready_counter, 1);
             debug("READY COUNT:%d POSTED from arrival.", atomic_load(&ready_counter));
             j++;
+            update_global_counter(1);
         }
-        update_global_counter(1);
-        // sem_post(&ready_counter);
     }
     fprintf(stderr, "arrival thread exiting\n");
     return NULL;
@@ -67,7 +64,6 @@ static STATUS _process_cpu(process_t **pd) {
     if (_should_terminate(*pd)) {
         debug("Process %d will be terminated", (*pd)->pid);
         update_term_counter(1);
-        // sem_post(&wait_count);
         (*pd)->status = TERMINATED;
         debug("Process %d is terminated", (*pd)->pid);
         return TERMINATED;
@@ -80,7 +76,8 @@ static STATUS _process_cpu(process_t **pd) {
 
         (*pd)->status = SLEEP;
         add_to_waitQueue(*pd);
-        return (*pd)->status;
+        sem_post(&wait_count);
+        return SLEEP;
     }
     if ((*pd)->status == READY) {
         // cpu work will be done
@@ -90,6 +87,7 @@ static STATUS _process_cpu(process_t **pd) {
 
         (*pd)->status = SLEEP;
         add_to_waitQueue(*pd);
+        sem_post(&wait_count);
         return SLEEP;
     }
     debug("Process %d with invalid state: %s given", (*pd)->pid, STATUS_ARR[(*pd)->status]);
@@ -103,7 +101,6 @@ static STATUS _process_io(process_t **pd) {
     if (_should_terminate(*pd)) {
         debug("Process %d will be terminated", (*pd)->pid);
         update_term_counter(1);
-        // sem_post(&ready_count);
         (*pd)->status = TERMINATED;
         debug("Process %d is terminated", (*pd)->pid);
         return TERMINATED;
@@ -116,6 +113,7 @@ static STATUS _process_io(process_t **pd) {
 
         (*pd)->status = READY;
         add_to_readyQueue(*pd);
+        sem_post(&ready_count);
         return READY;
     }
     debug("Process %d with invalid state: %s given", (*pd)->pid, STATUS_ARR[(*pd)->status]);
@@ -127,7 +125,7 @@ error:
 void *schedular() {
     int i = 0;
     // int desired = TOTAL_PROCESS;
-    while (atomic_load(&TERMINATED_PROCESS) < TOTAL_PROCESS) {
+    while (1) {
         i++;
         // atomic_compare_exchange_strong(&TERMINATED_PROCESS, &TOTAL_PROCESS, &desired;)
         // Check if all processes are done
@@ -162,34 +160,35 @@ void *schedular() {
             debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d", atomic_load(&TERMINATED_PROCESS),
                   TOTAL_PROCESS);
         }
-        // if (!is_emptyReadyQueue_t() && is_emptyWaitQueue_t()) {
-        //     debug("ready Queue is empty");
-        //     continue;
-        // }
-        sem_wait(&ready_count);
-        debug("READY COUNT WAITED Schedular");
-        atomic_fetch_sub(&ready_counter, 1);
-        debug("READY COUNT:%d, wait count: %d", atomic_load(&ready_counter),
-              atomic_load(&wait_counter));
-        // debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d",
-        //      read_term_counter(), TOTAL_PROCESS, i);
 
-        running_pd = remove_from_readyQueue();
-        if (running_pd) {
-            debug("Process %d is doing cpu with state: %s", running_pd->pid,
-                  STATUS_ARR[running_pd->status]);
-            STATUS st = _process_cpu(&running_pd);
-            if (st == SLEEP) {
-                sem_post(&wait_count);
-                atomic_fetch_add(&wait_counter, 1);
-                debug("READY COUNT:%d, wait count: %d", atomic_load(&ready_counter),
-                      atomic_load(&wait_counter));
+        if (all_processes_done()) {
+            debug("Ready and wait queue is empty");
+            break;
+        }
+        if (sem_trywait(&ready_count) == 0){
+            debug("READY COUNT WAITED Schedular");
+            debug("READY COUNT:%d, wait count: %d", atomic_load(&ready_counter),
+                  atomic_load(&wait_counter));
+            // debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d",
+            //      read_term_counter(), TOTAL_PROCESS, i);
+    
+            running_pd = remove_from_readyQueue();
+            if (running_pd) {
+                debug("Process %d is doing cpu with state: %s", running_pd->pid,
+                      STATUS_ARR[running_pd->status]);
+                STATUS st = _process_cpu(&running_pd);
+                if (st == SLEEP) {
+                    // sem_post(&wait_count);
+                    // atomic_fetch_add(&wait_counter, 1);
+                    debug("READY COUNT:%d, wait count: %d", atomic_load(&ready_counter),
+                          atomic_load(&wait_counter));
+                }
+                if (st == TERMINATED) {
+                    debug("TERMINATED process: %d ", atomic_load(&TERMINATED_PROCESS));
+                }
+            } else {
+                debug("BUG: No process in ready queue");
             }
-            if (st == TERMINATED) {
-                debug("TERMINATED process: %d ", atomic_load(&TERMINATED_PROCESS));
-            }
-        } else {
-            debug("BUG: No process in ready queue");
         }
     }
     debug("Scheduler exiting\n");
@@ -231,7 +230,6 @@ void *wake_up() {
         //     continue;
         // }
         sem_wait(&wait_count);
-        atomic_fetch_sub(&wait_counter, 1);
         debug("READY COUNT:%d, wait count: %d", atomic_load(&ready_counter),
               atomic_load(&wait_counter));
         // debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d",
@@ -243,8 +241,8 @@ void *wake_up() {
                   STATUS_ARR[sleeping_pd->status]);
             STATUS st = _process_io(&sleeping_pd);
             if (st == READY) {
-                sem_post(&ready_count);
-                atomic_fetch_add(&ready_counter, 1);
+                // sem_post(&ready_count);
+                // atomic_fetch_add(&ready_counter, 1);
                 debug("READY COUNT:%d, wait count: %d", atomic_load(&ready_counter),
                       atomic_load(&wait_counter));
             }

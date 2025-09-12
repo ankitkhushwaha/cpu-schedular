@@ -60,27 +60,17 @@ int read_global_counter() {
 
 bool update_term_counter(int val) {
     // pthread_mutex_lock(&term_counter_mutex);
-    int oldv = atomic_fetch_add(&TERMINATED_PROCESS, val);
-    int newv = oldv + val;
-        if (newv >= 2) {
-        // force any blocked sched/wakeup to wake and re-check
-    // wake many times to be sure
-    for (int k = 0; k < 10; ++k) {
-        sem_post(&ready_count);
-        sem_post(&wait_count);
-    }
-    }
+    atomic_fetch_add(&TERMINATED_PROCESS, val);
     // TERMINATED_PROCESS += val;
     // pthread_mutex_unlock(&term_counter_mutex);
     return true;
 }
 
-// int read_term_counter(){
-//     // pthread_mutex_lock(&term_counter_mutex);
-//     int val = atomic_load(&TERMINATED_PROCESS);
-//     // pthread_mutex_unlock(&term_counter_mutex);
-//     return val;
-// }
+int read_term_counter(){
+    // pthread_mutex_lock(&term_counter_mutex);
+    return atomic_load(&TERMINATED_PROCESS);
+    // pthread_mutex_unlock(&term_counter_mutex);
+}
 
 bool is_emptyReadyQueue_t() {
     pthread_mutex_lock(&readyQueue_mutex);
@@ -138,11 +128,11 @@ int read_ready_sem_value_t(){
     return tmp;
 }
 
-// bool all_processes_done() {
-//     return (read_term_counter() >= TOTAL_PROCESS) && 
-//            is_emptyReadyQueue_t() && 
-//            is_emptyWaitQueue_t();
-// }
+bool all_processes_done() {
+    return (read_term_counter() >= TOTAL_PROCESS) && 
+           is_emptyReadyQueue_t() && 
+           is_emptyWaitQueue_t();
+}
 
 // NOT THREAD SAFE
 process_t *find_process(Queue *queue, int pid) {
