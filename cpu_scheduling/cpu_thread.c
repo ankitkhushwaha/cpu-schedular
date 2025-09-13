@@ -19,7 +19,10 @@ void *add_arrival_process(burst_data **data) {
             process_t *p = create_process();
             check(p, "failed to create process");
             p->process_d = (*data)->b_data[j];
-
+            
+            assert_t((*data)->b_data[j]->a_time == read_global_counter());
+            p->process_d->a_time = (*data)->b_data[j]->a_time;
+            
             add_to_readyQueue(p);
             add_to_taskList(p);
             debug("process %d is added to [ready,task_list] queue at time: %d", j,
@@ -67,6 +70,12 @@ static STATUS _process_cpu(process_t **pd) {
         debug("Process %d will be terminated", (*pd)->pid);
         update_term_counter(1);
         (*pd)->status = TERMINATED;
+
+        debug("process time: %d, arrival time: %d, global_time: %d", 
+            (*pd)->process_time, (*pd)->process_d->a_time, read_global_counter());
+        (*pd)->turnaround_time = (*pd)->process_time;
+        assert_t((*pd)->turnaround_time >= 0);
+        debug("turnaround time: %d", (*pd)->turnaround_time);
         debug("Process %d is terminated", (*pd)->pid);
         return TERMINATED;
     }
@@ -74,8 +83,9 @@ static STATUS _process_cpu(process_t **pd) {
     if ((*pd)->status == NEW) {
         (*pd)->cpu_time = (*pd)->process_d->cpu_burst[0];
         update_global_counter((*pd)->process_d->cpu_burst[0]);
+        (*pd)->process_time += (*pd)->process_d->cpu_burst[0];
+        
         (*pd)->cpu_index += 1;
-
         (*pd)->status = SLEEP;
         add_to_waitQueue(*pd);
         sem_post(&wait_count);
@@ -84,6 +94,8 @@ static STATUS _process_cpu(process_t **pd) {
     if ((*pd)->status == READY) {
         // cpu work will be done
         (*pd)->cpu_time += (*pd)->process_d->cpu_burst[(*pd)->cpu_index];
+        (*pd)->process_time += (*pd)->process_d->cpu_burst[(*pd)->cpu_index];
+
         update_global_counter((*pd)->process_d->cpu_burst[(*pd)->cpu_index]);
         (*pd)->cpu_index += 1;
 
@@ -104,6 +116,13 @@ static STATUS _process_io(process_t **pd) {
         debug("Process %d will be terminated", (*pd)->pid);
         update_term_counter(1);
         (*pd)->status = TERMINATED;
+
+        debug("cpu usage time: %d, arrival time: %d, global_time: %d", 
+            (*pd)->process_time, (*pd)->process_d->a_time, read_global_counter());
+        (*pd)->turnaround_time = (*pd)->process_time;
+        assert_t((*pd)->turnaround_time >= 0);
+        debug("turnaround time: %d", (*pd)->turnaround_time);
+
         debug("Process %d is terminated", (*pd)->pid);
         return TERMINATED;
     }
@@ -111,8 +130,9 @@ static STATUS _process_io(process_t **pd) {
         // io work will be done
         (*pd)->io_time += (*pd)->process_d->io_burst[(*pd)->io_index];
         update_global_counter((*pd)->process_d->io_burst[(*pd)->io_index]);
+        (*pd)->process_time += (*pd)->process_d->io_burst[(*pd)->io_index];
+        
         (*pd)->io_index += 1;
-
         (*pd)->status = READY;
         add_to_readyQueue(*pd);
         sem_post(&ready_count);

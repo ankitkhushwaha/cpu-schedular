@@ -18,6 +18,11 @@ typedef struct {
     STATUS status;
     int cpu_time;
     int io_time;
+    int a_time;
+    int process_time; // total cpu usage time
+    // code is creating multiple threads that get scheduled by actual cpu
+    // so we will use turnaround_time theortical formula to get it.
+    int turnaround_time;
 } process_t;
 
 process_t *create_process();
