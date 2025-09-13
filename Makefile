@@ -5,7 +5,7 @@ SOURCES  = $(wildcard src/*.c cpu_scheduling/*.c) main.c
 OBJECTS  = $(patsubst %.c, %.o, $(SOURCES))
 
 TARGET = main
-# -fsanitize=thread
+
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)

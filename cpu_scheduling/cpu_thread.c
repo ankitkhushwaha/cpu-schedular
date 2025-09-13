@@ -14,7 +14,8 @@ atomic_int ready_counter = 0;
 void *add_arrival_process(burst_data **data) {
     int j = 0;
     int t_process = (*data)->t_process;
-    debug("total process: %d", t_process);
+    int max_arrTime = (*data)->b_data[t_process - 1]->a_time;
+    debug("total process: %d, MAX ARRIVAL TIME: %d", t_process, max_arrTime);
     while (j != t_process) {
         if ((*data)->b_data[j]->a_time <= read_global_counter()) {
             process_t *p = create_process();
@@ -28,10 +29,14 @@ void *add_arrival_process(burst_data **data) {
             sem_post(&ready_count);
             debug("READY COUNT:%d POSTED from arrival.", atomic_load(&ready_counter));
             j++;
-            update_global_counter(1);
         }
+        debug("global counter: %d, max_arrTime: %d", read_global_counter(), max_arrTime);
+        assert_t(read_global_counter() <= max_arrTime);
+        update_global_counter(1);
     }
-    fprintf(stderr, "arrival thread exiting\n");
+    debug("j: %d, t_process: %d", j, t_process);
+    assert_t(j == t_process);
+    debug("arrival thread exiting");
     return NULL;
 error:
     exit(EXIT_FAILURE);
