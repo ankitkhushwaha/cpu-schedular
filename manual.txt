@@ -1,0 +1,40 @@
+check global counter is updated or not
+implement ouptut.file
+add data structure for turnaround time and other param
+create genric ds for genric enqueue, dequeue operation as below algos
+add support for multiple cpu
+write report
+add githooks for format code
+io process is same as cpu -> single threaded
+
+A. First In First Out (FIFO)
+    Data structure: simple queue.
+    Dequeue rule: head of queue.
+    CPU runs that process until it finishes.
+    No preemption.
+
+B. Non-preemptive Shortest Job First (SJF)
+    Data structure: priority queue, ordered by burst time.
+    Dequeue rule: pick the process with smallest CPU burst among those ready.
+    CPU runs it until it finishes.
+    Still no preemption.
+
+C. Preemptive Shortest Job First (SRTF – Shortest Remaining Time First)
+    Data structure: priority queue, ordered by remaining burst time.
+    Dequeue rule: always pick process with shortest remaining time.
+    Preemption happens: if a new process arrives with shorter burst than the current one → current is paused and re-enqueued.
+    So here dequeue isn’t just at completion—it can happen mid-burst.
+
+D. Round Robin (RR)
+    Data structure: simple queue (like FIFO).
+    Dequeue rule: head of queue.
+    CPU runs that process for time_quantum only.
+    If process finishes early → remove.
+    If not → preempt and re-enqueue at tail.
+    Preemption always after quantum.
+
+👉 So:
+A = normal queue.
+B = priority queue (non-preemptive).
+C = priority queue (preemptive).
+D = queue + time slicing.
