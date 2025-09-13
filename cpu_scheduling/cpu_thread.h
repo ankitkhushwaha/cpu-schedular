@@ -12,9 +12,6 @@
 extern int TOTAL_PROCESS;
 extern atomic_int TERMINATED_PROCESS;
 
-extern atomic_int wait_counter;
-extern atomic_int ready_counter;
-
 extern bool is_emptyWaitQueue_t();
 extern bool is_emptyReadyQueue_t();
 

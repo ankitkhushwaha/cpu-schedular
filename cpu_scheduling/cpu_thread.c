@@ -8,8 +8,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-atomic_int wait_counter = 0;
-atomic_int ready_counter = 0;
 
 void *add_arrival_process(burst_data **data) {
     int j = 0;
@@ -27,7 +25,6 @@ void *add_arrival_process(burst_data **data) {
             debug("process %d is added to [ready,task_list] queue at time: %d", j,
                   read_global_counter());
             sem_post(&ready_count);
-            debug("READY COUNT:%d POSTED from arrival.", atomic_load(&ready_counter));
             j++;
         }
         debug("global counter: %d, max_arrTime: %d", read_global_counter(), max_arrTime);
@@ -172,8 +169,6 @@ void *schedular() {
         }
         if (sem_trywait(&ready_count) == 0) {
             debug("READY COUNT WAITED Schedular");
-            debug("READY COUNT:%d, wait count: %d", atomic_load(&ready_counter),
-                  atomic_load(&wait_counter));
             // debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d",
             //      read_term_counter(), TOTAL_PROCESS, i);
 
@@ -184,9 +179,6 @@ void *schedular() {
                 STATUS st = _process_cpu(&running_pd);
                 if (st == SLEEP) {
                     // sem_post(&wait_count);
-                    // atomic_fetch_add(&wait_counter, 1);
-                    debug("READY COUNT:%d, wait count: %d", atomic_load(&ready_counter),
-                          atomic_load(&wait_counter));
                 }
                 if (st == TERMINATED) {
                     debug("TERMINATED process: %d ", atomic_load(&TERMINATED_PROCESS));
@@ -243,9 +235,6 @@ void *wake_up() {
                 STATUS st = _process_io(&sleeping_pd);
                 if (st == READY) {
                     // sem_post(&ready_count);
-                    // atomic_fetch_add(&ready_counter, 1);
-                    debug("READY COUNT:%d, wait count: %d", atomic_load(&ready_counter),
-                          atomic_load(&wait_counter));
                 }
                 if (st == TERMINATED) {
                     debug("TERMINATED process: %d ", atomic_load(&TERMINATED_PROCESS));
