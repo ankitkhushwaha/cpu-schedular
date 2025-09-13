@@ -11,6 +11,7 @@
 #include "time_t.h"
 
 timer__t *wall_timer;
+int start_time, end_time;
 
 void *add_arrival_process(burst_data **data) {
     int j = 0;
@@ -35,6 +36,8 @@ void *add_arrival_process(burst_data **data) {
         }
         debug("global counter: %d, max_arrTime: %d", read_global_counter(), max_arrTime);
         assert_t(read_global_counter() <= max_arrTime);
+        if (j == t_process)
+            break;
         update_global_counter(1);
     }
     debug("j: %d, t_process: %d", j, t_process);
@@ -90,8 +93,10 @@ static STATUS _process_cpu(process_t **pd) {
     }
     
     if ((*pd)->status == NEW) {
+        start_time = read_global_counter();
         (*pd)->cpu_time = (*pd)->process_d->cpu_burst[0];
         update_global_counter((*pd)->process_d->cpu_burst[0]);
+        end_time = read_global_counter();
         (*pd)->process_time += (*pd)->process_d->cpu_burst[0];
         
         (*pd)->cpu_index += 1;
@@ -102,11 +107,13 @@ static STATUS _process_cpu(process_t **pd) {
         goto final;
     }
     if ((*pd)->status == READY) {
+        start_time = read_global_counter();
         // cpu work will be done
         (*pd)->cpu_time += (*pd)->process_d->cpu_burst[(*pd)->cpu_index];
         (*pd)->process_time += (*pd)->process_d->cpu_burst[(*pd)->cpu_index];
 
         update_global_counter((*pd)->process_d->cpu_burst[(*pd)->cpu_index]);
+        end_time = read_global_counter();
         (*pd)->cpu_index += 1;
         
         (*pd)->status = SLEEP;
@@ -119,6 +126,8 @@ static STATUS _process_cpu(process_t **pd) {
     _status = UNDEFINED;
 
 final:
+    if (_status!= TERMINATED && _status!= UNDEFINED)
+        write_cpu_process_data(*pd, start_time, end_time);
     clock_gettime(CLOCK_REALTIME, &wall_timer->end);
     print_time(wall_timer->end, "END");
     struct timespec diff = diff_timespec(wall_timer);

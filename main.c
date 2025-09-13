@@ -18,6 +18,7 @@ atomic_int global_counter = 0;
 int T_PROCESS = 0;
 int TOTAL_PROCESS = 0;
 atomic_int TERMINATED_PROCESS = 0;
+FILE *task_log;
 
 process_t *sleeping_pd;
 
@@ -65,6 +66,12 @@ int main(int argc, char *argv[]) {
     // char *scheduler = argv[1];
     char *input_file = argv[1];
 
+    task_log = fopen("task_log.txt", "w");
+    if (!task_log) {
+        perror("Failed to open task_log.txt");
+        exit(EXIT_FAILURE);
+    }
+    fprintf(task_log, "CPU0\n");
     // Read the input file
     burst_data *data = read_burstfile(input_file);
     check(data != NULL, "Failed to read input file '%s'", input_file);
@@ -122,6 +129,7 @@ int main(int argc, char *argv[]) {
     pthread_mutex_destroy(&task_list_mutex);
     pthread_mutex_destroy(&term_counter_mutex);
 
+    fclose(task_log);
     return 0;
 error:
     return 1;

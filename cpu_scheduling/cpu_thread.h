@@ -13,6 +13,7 @@
 extern int TOTAL_PROCESS;
 extern atomic_int TERMINATED_PROCESS;
 
+extern FILE *task_log;
 extern timer__t *wall_timer;
 
 extern bool is_emptyWaitQueue_t();

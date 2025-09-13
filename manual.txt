@@ -1,5 +1,3 @@
-add run time for simulutor
-check global counter is updated or not
 implement ouptut.file
 add data structure for turnaround time and other param
 create genric ds for genric enqueue, dequeue operation as below algos

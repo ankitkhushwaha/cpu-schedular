@@ -128,6 +128,14 @@ static void _process_burst_line(char *line, burst_line *data) {
     free(io_burst);
 }
 
+void write_process_data(FILE *fp, int pid, int cpu_index, int start, int end) {
+    int ret = fprintf(fp, "p%d,%d    %d    %d\n", pid, cpu_index, start, end);
+    if (ret < 0) {
+        perror("Failed to write to file");
+        exit(EXIT_FAILURE);
+    }
+}
+
 // int main(int argc, char *argv[])
 // {
 // char *str[] = {"6 10 2 60 2 30 3 70 2 10 2 10 -1", "0 15 2 5 2 15 2 5 2 15 2 5 2 15 2 5 2 15 2 5

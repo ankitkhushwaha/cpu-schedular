@@ -3,3 +3,4 @@ main
 .gdbinit
 core
 a.out
+task_log.txt

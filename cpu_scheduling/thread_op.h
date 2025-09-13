@@ -7,10 +7,12 @@
 #include <semaphore.h>
 #include <stdatomic.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 extern sem_t wait_count;
 extern sem_t ready_count;
 
+extern FILE *task_log;
 extern Queue *readyQueue;
 extern Queue *waitQueue;
 extern Queue *task_list;
@@ -47,4 +49,6 @@ bool all_processes_done();
 
 void *process_pd(process_t *);
 process_t *find_process(Queue *, int);
+
+void *write_cpu_process_data(process_t *, int, int);
 #endif

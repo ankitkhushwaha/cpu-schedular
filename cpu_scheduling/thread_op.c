@@ -132,6 +132,11 @@ bool all_processes_done() {
            is_emptyWaitQueue_t();
 }
 
+void *write_cpu_process_data(process_t *pd, int start, int end) {
+    write_process_data(task_log, pd->pid, pd->cpu_index, start, end);
+    return NULL;
+}
+
 // NOT THREAD SAFE
 process_t *find_process(Queue *queue, int pid) {
     node *tnode;

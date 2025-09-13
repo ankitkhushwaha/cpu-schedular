@@ -1,6 +1,8 @@
 #ifndef FILE_H
 #define FILE_H
 
+#include <stdio.h>
+
 typedef struct burst_line {
     int *cpu_burst;
     int *io_burst;
@@ -15,5 +17,5 @@ typedef struct burst_data {
 } burst_data;
 
 burst_data *read_burstfile(char *);
-
+void write_process_data(FILE*, int , int , int , int );
 #endif
