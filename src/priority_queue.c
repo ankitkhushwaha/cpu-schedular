@@ -122,51 +122,51 @@ void freePriorityQueue(struct PriorityQueue* pq) {
 }
 
 // Main function to demonstrate priority queue operations
-int main() {
-    int capacity, choice, data, priority;
+// int main() {
+//     int capacity, choice, data, priority;
 
-    printf("Enter the capacity of the priority queue: ");
-    scanf("%d", &capacity);
+//     printf("Enter the capacity of the priority queue: ");
+//     scanf("%d", &capacity);
 
-    struct PriorityQueue* pq = createPriorityQueue(capacity);
+//     struct PriorityQueue* pq = createPriorityQueue(capacity);
 
-    while (1) {
-        printf("\nPriority Queue Operations:\n");
-        printf("1. Insert Element\n");
-        printf("2. Extract Maximum Element\n");
-        printf("3. Display Priority Queue\n");
-        printf("4. Exit\n");
-        printf("Enter your choice: ");
-        scanf("%d", &choice);
+//     while (1) {
+//         printf("\nPriority Queue Operations:\n");
+//         printf("1. Insert Element\n");
+//         printf("2. Extract Maximum Element\n");
+//         printf("3. Display Priority Queue\n");
+//         printf("4. Exit\n");
+//         printf("Enter your choice: ");
+//         scanf("%d", &choice);
 
-        switch (choice) {
-            case 1:
-                printf("Enter element and its priority to insert: ");
-                scanf("%d %d", &data, &priority);
-                insert(pq, data, priority);
-                break;
-            case 2:
-                printf("Extracting maximum priority element...\n");
-                {
-                    struct PQNode node = extractMax(pq);
-                    if (node.priority != 0)
-                        printf("Extracted element: (%d, %d)\n", node.data, node.priority);
-                }
-                break;
-            case 3:
-                displayPriorityQueue(pq);
-                break;
-            case 4:
-                printf("Exiting program.\n");
-                freePriorityQueue(pq);
-                exit(0);
-            default:
-                printf("Invalid choice. Please try again.\n");
-        }
-    }
+//         switch (choice) {
+//             case 1:
+//                 printf("Enter element and its priority to insert: ");
+//                 scanf("%d %d", &data, &priority);
+//                 insert(pq, data, priority);
+//                 break;
+//             case 2:
+//                 printf("Extracting maximum priority element...\n");
+//                 {
+//                     struct PQNode node = extractMax(pq);
+//                     if (node.priority != 0)
+//                         printf("Extracted element: (%d, %d)\n", node.data, node.priority);
+//                 }
+//                 break;
+//             case 3:
+//                 displayPriorityQueue(pq);
+//                 break;
+//             case 4:
+//                 printf("Exiting program.\n");
+//                 freePriorityQueue(pq);
+//                 exit(0);
+//             default:
+//                 printf("Invalid choice. Please try again.\n");
+//         }
+//     }
 
-    return 0;
-}
+//     return 0;
+// }
 
 
 							
