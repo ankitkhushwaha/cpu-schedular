@@ -4,6 +4,7 @@
 #include "file.h"
 #include "process.h"
 #include "queue.h"
+#include "time_t.h"
 #include "thread_op.h"
 #include <pthread.h>
 #include <semaphore.h>
@@ -11,6 +12,8 @@
 
 extern int TOTAL_PROCESS;
 extern atomic_int TERMINATED_PROCESS;
+
+extern timer__t *wall_timer;
 
 extern bool is_emptyWaitQueue_t();
 extern bool is_emptyReadyQueue_t();

@@ -7,7 +7,10 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+#include "time_t.h"
 
+timer__t *wall_timer;
 
 void *add_arrival_process(burst_data **data) {
     int j = 0;
@@ -66,6 +69,10 @@ static bool _should_terminate(process_t *pd) {
 
 static STATUS _process_cpu(process_t **pd) {
     check(*pd, "Process given to use is NULL");
+    
+    STATUS _status;
+    clock_gettime(CLOCK_REALTIME, &wall_timer->start);
+    print_time(wall_timer->start, "START");
     if (_should_terminate(*pd)) {
         debug("Process %d will be terminated", (*pd)->pid);
         update_term_counter(1);
@@ -77,9 +84,11 @@ static STATUS _process_cpu(process_t **pd) {
         assert_t((*pd)->turnaround_time >= 0);
         debug("turnaround time: %d", (*pd)->turnaround_time);
         debug("Process %d is terminated", (*pd)->pid);
-        return TERMINATED;
+        
+        _status =  TERMINATED;
+        goto final;
     }
-
+    
     if ((*pd)->status == NEW) {
         (*pd)->cpu_time = (*pd)->process_d->cpu_burst[0];
         update_global_counter((*pd)->process_d->cpu_burst[0]);
@@ -89,7 +98,8 @@ static STATUS _process_cpu(process_t **pd) {
         (*pd)->status = SLEEP;
         add_to_waitQueue(*pd);
         sem_post(&wait_count);
-        return SLEEP;
+        _status = SLEEP;
+        goto final;
     }
     if ((*pd)->status == READY) {
         // cpu work will be done
@@ -98,14 +108,24 @@ static STATUS _process_cpu(process_t **pd) {
 
         update_global_counter((*pd)->process_d->cpu_burst[(*pd)->cpu_index]);
         (*pd)->cpu_index += 1;
-
+        
         (*pd)->status = SLEEP;
         add_to_waitQueue(*pd);
         sem_post(&wait_count);
-        return SLEEP;
+        _status = SLEEP;
+        goto final;
     }
     debug("Process %d with invalid state: %s given", (*pd)->pid, STATUS_ARR[(*pd)->status]);
-    return UNDEFINED;
+    _status = UNDEFINED;
+
+final:
+    clock_gettime(CLOCK_REALTIME, &wall_timer->end);
+    print_time(wall_timer->end, "END");
+    struct timespec diff = diff_timespec(wall_timer);
+    print_time(diff, "diff_Time");
+    (*pd)->wall_time = timespec_add((*pd)->wall_time, diff);
+    return _status;
+
 error:
     exit(EXIT_FAILURE);
 }
@@ -146,6 +166,7 @@ error:
 
 void *schedular() {
     int i = 0;
+    wall_timer = create_timer();
     // int desired = TOTAL_PROCESS;
     while (1) {
         i++;
@@ -209,6 +230,7 @@ void *schedular() {
         }
     }
     debug("Scheduler exiting\n");
+    free(wall_timer);
     return NULL;
 }
 

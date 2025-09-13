@@ -1,3 +1,4 @@
+add run time for simulutor
 check global counter is updated or not
 implement ouptut.file
 add data structure for turnaround time and other param
@@ -5,6 +6,7 @@ create genric ds for genric enqueue, dequeue operation as below algos
 add support for multiple cpu
 write report
 add githooks for format code
+refractor cpu_scheduling/cpu_thread.c
 io process is same as cpu -> single threaded
 
 A. First In First Out (FIFO)
