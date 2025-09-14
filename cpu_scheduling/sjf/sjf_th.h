@@ -1,8 +1,8 @@
 #ifndef SJF_TH_H
 #define SJF_TH_H
 
-#include <pthread.h>
 #include "thread_op.h"
+#include <pthread.h>
 
 extern Queue *readyQueue;
 extern Queue *waitQueue;

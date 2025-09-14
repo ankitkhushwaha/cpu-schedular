@@ -21,7 +21,7 @@ error:
     exit(EXIT_FAILURE);
 }
 
-thread_op_t *create_thread_op(){
+thread_op_t *create_thread_op() {
     thread_op_t *op = malloc(sizeof(thread_op_t));
     check_mem(op);
     return op;
@@ -78,7 +78,6 @@ bool is_emptyTaskList_t() {
     pthread_mutex_unlock(&task_list_mutex);
     return val;
 }
-
 
 int read_wait_sem_value_t() {
     int tmp;

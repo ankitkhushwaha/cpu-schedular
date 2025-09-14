@@ -1,9 +1,9 @@
 #include "sched_common.h"
 #include "dbg.h"
 #include "fifo_sched.h"
+#include "fifo_th.h"
 #include "sjf_sched.h"
 #include "sjf_th.h"
-#include "fifo_th.h"
 #include <stdlib.h>
 
 timer__t *wall_timer;
@@ -21,8 +21,7 @@ void init_scheduler(char *sched_type) {
     if (strcmp(sched_type, "fcfs") == 0) {
         init_fcfs_sched();
         init_fcfs_th();
-    }
-    else if (strcmp(sched_type, "sjf") == 0) {
+    } else if (strcmp(sched_type, "sjf") == 0) {
         init_sjf();
         init_sjf_th();
     }

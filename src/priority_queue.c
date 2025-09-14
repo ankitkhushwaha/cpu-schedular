@@ -1,3 +1,4 @@
+#include "priority_queue.h"
 #include "dbg.h"
 #include "process.h"
 #include "queue.h"
@@ -30,7 +31,7 @@ node *p_enqueue(Queue *queue, process_t *pd, int priority) {
 
         assert_t(queue->front == queue->rear);
         assert_t(queue->front == newnode);
-        return queue->front;
+        goto final;
     }
     // check for front pid
     if (queue->front->priority > priority) {
@@ -39,29 +40,31 @@ node *p_enqueue(Queue *queue, process_t *pd, int priority) {
         queue->len++;
 
         assert_t(queue->front == newnode);
-        return newnode;
+        goto final;
     }
-    node *tnode, *snode;
+    node *snode = NULL, *tnode = NULL;
     Traverse(tnode, queue) {
         snode = tnode->next;
         if (!snode)
-            break;
+            break; // this line is never reached
         debug("snode->priority: %d, Node priority: %d", snode->priority, priority);
         if (snode->priority > priority) {
             break;
         }
     }
-    if (!snode) {
-        assert_t(queue->rear == tnode);
+    if (tnode == queue->rear) {
         queue->rear->next = newnode;
         queue->rear = newnode;
         queue->len++;
         assert_t(queue->rear == newnode);
-        return queue->front;
+        goto final;
     }
     tnode->next = newnode;
     newnode->next = snode;
     queue->len++;
+
+final:
+    isValidQueue(queue);
     return queue->front;
 }
 

@@ -1,12 +1,12 @@
+#include "fifo_th.h"
+#include "dbg.h"
 #include "process.h"
 #include "queue.h"
-#include "dbg.h"
-#include "fifo_th.h"
-#include <pthread.h>
 #include "thread_op.h"
+#include <pthread.h>
 #include <stdlib.h>
 
-void init_fcfs_th(){
+void init_fcfs_th() {
     thread_core = create_thread_op();
     check_mem(thread_core);
     thread_core->add_to_readyQueue_core = add_to_readyQueue_fifo;

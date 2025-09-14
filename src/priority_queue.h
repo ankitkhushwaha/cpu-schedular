@@ -4,8 +4,8 @@
 #include "queue.h"
 
 Queue *p_queue_create();
-node *p_enqueue(Queue *, process_t *);
-node *p_newNode(process_t *pd, int priority);
+node *p_enqueue(Queue *, process_t *, int);
+node *p_newNode(process_t *, int);
 process_t *p_dequeue(Queue *);
 bool p_isEmpty(Queue *);
 process_t *p_remove_node_by_pid(Queue *, int);

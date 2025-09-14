@@ -1,6 +1,7 @@
 *.o
 main
 .gdbinit
+.gdb
 core
 a.out
 task_log.txt

@@ -1,12 +1,13 @@
+#include "sjf_th.h"
+#include "dbg.h"
+#include "priority_queue.h"
 #include "process.h"
 #include "queue.h"
-#include "dbg.h"
-#include "sjf_th.h"
 #include "thread_op.h"
-#include <stdlib.h>
 #include <pthread.h>
+#include <stdlib.h>
 
-void init_sjf_th(){
+void init_sjf_th() {
     thread_core = create_thread_op();
     check_mem(thread_core);
     thread_core->add_to_readyQueue_core = add_to_readyQueue_sjf;
@@ -23,28 +24,28 @@ error:
 
 void *add_to_readyQueue_sjf(process_t *p) {
     pthread_mutex_lock(&readyQueue_mutex);
-    enqueue(readyQueue, p);
+    p_enqueue(readyQueue, p, p->priority);
     pthread_mutex_unlock(&readyQueue_mutex);
     return NULL;
 }
 
 void *add_to_waitQueue_sjf(process_t *p) {
     pthread_mutex_lock(&waitQueue_mutex);
-    enqueue(waitQueue, p);
+    p_enqueue(waitQueue, p, p->priority);
     pthread_mutex_unlock(&waitQueue_mutex);
     return NULL;
 }
 
 void *add_to_taskList_sjf(process_t *p) {
     pthread_mutex_lock(&task_list_mutex);
-    enqueue(task_list, p);
+    p_enqueue(task_list, p, p->priority);
     pthread_mutex_unlock(&task_list_mutex);
     return NULL;
 }
 
 process_t *remove_from_readyQueue_sjf() {
     pthread_mutex_lock(&readyQueue_mutex);
-    process_t *pd = dequeue(readyQueue);
+    process_t *pd = p_dequeue(readyQueue);
     pthread_mutex_unlock(&readyQueue_mutex);
 
     return pd;
@@ -52,7 +53,7 @@ process_t *remove_from_readyQueue_sjf() {
 
 process_t *remove_from_waitQueue_sjf() {
     pthread_mutex_lock(&waitQueue_mutex);
-    process_t *pd = dequeue(waitQueue);
+    process_t *pd = p_dequeue(waitQueue);
     pthread_mutex_unlock(&waitQueue_mutex);
 
     return pd;

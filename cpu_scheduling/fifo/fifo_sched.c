@@ -1,6 +1,6 @@
 #include "fifo_sched.h"
-#include "fifo_th.h"
 #include "dbg.h"
+#include "fifo_th.h"
 #include "process.h"
 #include "queue.h"
 #include "sched_common.h"

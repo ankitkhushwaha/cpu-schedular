@@ -1,9 +1,9 @@
 #include "sjf_sched.h"
-#include "sjf_th.h"
 #include "dbg.h"
 #include "process.h"
 #include "queue.h"
 #include "sched_common.h"
+#include "sjf_th.h"
 #include "thread_op.h"
 #include "time_t.h"
 #include <stdatomic.h>
@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-
 
 void init_sjf() {
     process_core = create_scheduler();
@@ -40,6 +39,7 @@ void *add_arrival_process_sjf(burst_data **data) {
             // assert_t((*data)->b_data[j]->a_time == read_global_counter());
             p->process_d->a_time = (*data)->b_data[j]->a_time;
 
+            p->priority = (*data)->b_data[j]->cpu_burst[0];
             add_to_readyQueue_sjf(p);
             add_to_taskList_sjf(p);
             debug("process %d is added to [ready,task_list] queue at time: %d", j,
