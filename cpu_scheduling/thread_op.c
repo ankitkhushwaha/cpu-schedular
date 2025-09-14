@@ -21,25 +21,12 @@ error:
     exit(EXIT_FAILURE);
 }
 
-void *add_to_readyQueue(process_t *p) {
-    pthread_mutex_lock(&readyQueue_mutex);
-    enqueue(readyQueue, p);
-    pthread_mutex_unlock(&readyQueue_mutex);
-    return NULL;
-}
-
-void *add_to_waitQueue(process_t *p) {
-    pthread_mutex_lock(&waitQueue_mutex);
-    enqueue(waitQueue, p);
-    pthread_mutex_unlock(&waitQueue_mutex);
-    return NULL;
-}
-
-void *add_to_taskList(process_t *p) {
-    pthread_mutex_lock(&task_list_mutex);
-    enqueue(task_list, p);
-    pthread_mutex_unlock(&task_list_mutex);
-    return NULL;
+thread_op_t *create_thread_op(){
+    thread_op_t *op = malloc(sizeof(thread_op_t));
+    check_mem(op);
+    return op;
+error:
+    exit(EXIT_FAILURE);
 }
 
 void *update_global_counter(int val) {
@@ -92,28 +79,6 @@ bool is_emptyTaskList_t() {
     return val;
 }
 
-process_t *remove_from_readyQueue() {
-    pthread_mutex_lock(&readyQueue_mutex);
-    process_t *pd = dequeue(readyQueue);
-    pthread_mutex_unlock(&readyQueue_mutex);
-
-    return pd;
-}
-
-process_t *remove_from_waitQueue() {
-    pthread_mutex_lock(&waitQueue_mutex);
-    process_t *pd = dequeue(waitQueue);
-    pthread_mutex_unlock(&waitQueue_mutex);
-
-    return pd;
-}
-
-process_t *remove_node_by_pid_t(Queue *queue, int pid, pthread_mutex_t *mutex) {
-    pthread_mutex_lock(mutex);
-    process_t *pd = remove_node_by_pid(queue, pid);
-    pthread_mutex_unlock(mutex);
-    return pd;
-}
 
 int read_wait_sem_value_t() {
     int tmp;

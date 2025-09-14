@@ -24,10 +24,19 @@ extern pthread_mutex_t waitQueue_mutex;
 extern pthread_mutex_t task_list_mutex;
 extern pthread_mutex_t term_counter_mutex;
 
+typedef struct {
+    void *(*add_to_readyQueue_core)(process_t *);
+    void *(*add_to_waitQueue_core)(process_t *);
+    void *(*add_to_taskList_core)(process_t *);
+    process_t *(*remove_from_readyQueue_core)(void);
+    process_t *(*remove_from_waitQueue_core)(void);
+    process_t *(*remove_node_by_pid_core)(Queue *, int, pthread_mutex_t *);
+} thread_op_t;
+
+thread_op_t *create_thread_op();
+void destroy_thread_op(thread_op_t *);
+
 void *init_queues();
-void *add_to_readyQueue(process_t *);
-void *add_to_waitQueue(process_t *);
-void *add_to_taskList(process_t *p);
 
 void *update_global_counter(int);
 int read_global_counter();

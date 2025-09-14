@@ -23,6 +23,7 @@ FILE *task_log;
 process_t *running_pd;
 process_t *sleeping_pd;
 scheduler_ops_t *process_core;
+thread_op_t *thread_core;
 
 extern void queue_print(Queue *queue);
 extern void isValidQueue(Queue *queue);
@@ -63,7 +64,7 @@ int main(int argc, char *argv[]) {
     check(data != NULL, "Failed to read input file '%s'", input_file);
     TOTAL_PROCESS = data->t_process;
     init_queues();
-    init_scheduler("fcfs");
+    init_scheduler("sjf");
     pthread_t arrivalThread, schedularThread, wakeupThread;
     sem_init(&wait_count, 0, 0);
     sem_init(&ready_count, 0, 0);

@@ -3,6 +3,7 @@
 
 #include "file.h"
 #include "process.h"
+#include "queue.h"
 #include "time_t.h"
 
 extern timer__t *wall_timer;

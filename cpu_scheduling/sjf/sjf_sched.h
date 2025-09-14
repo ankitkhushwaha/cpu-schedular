@@ -1,5 +1,5 @@
-#ifndef FIFO_H
-#define FIFO_H
+#ifndef SJF_H
+#define SJF_H
 
 #include "sched_common.h"
 #include "file.h"
@@ -12,11 +12,11 @@ extern scheduler_ops_t *process_core;
 extern timer__t *wall_timer;
 extern int start_time, end_time;
 
-void init_fcfs();
-void destroy_fcfs();
+void init_sjf();
+void destroy_sjf();
 
-void *schedular_fifo();
-void *wakeUp_fifo();
-void *add_arrival_process_fifo(burst_data **);
+void *schedular_sjf();
+void *wakeUp_sjf();
+void *add_arrival_process_sjf(burst_data **);
 
 #endif

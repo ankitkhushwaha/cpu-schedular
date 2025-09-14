@@ -1,7 +1,7 @@
 CC = gcc
-CFLAGS = -Wall -g -Isrc -Icpu_scheduling -fsanitize=thread
-INCLUDES = $(wildcard src/*.h cpu_scheduling/*.h ./*.h)
-SOURCES  = $(wildcard src/*.c cpu_scheduling/*.c) main.c
+CFLAGS = -Wall -g -Isrc -Icpu_scheduling -Icpu_scheduling/fifo  -Icpu_scheduling/sjf -fsanitize=thread
+INCLUDES = $(wildcard src/*.h cpu_scheduling/*.h cpu_scheduling/fifo/*.h ./*.h)
+SOURCES  = $(wildcard src/*.c cpu_scheduling/*.c cpu_scheduling/fifo/*.c) main.c
 OBJECTS  = $(patsubst %.c, %.o, $(SOURCES))
 
 TARGET = main

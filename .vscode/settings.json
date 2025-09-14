@@ -14,6 +14,6 @@
         "semaphore.h": "c",
         "process.h": "c",
         "sched_common.h": "c",
-        "fifo.h": "c"
+        "fifo_sched.h": "c"
     }
 }

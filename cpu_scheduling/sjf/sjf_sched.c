@@ -1,4 +1,5 @@
-#include "fifo.h"
+#include "sjf_sched.h"
+#include "sjf_th.h"
 #include "dbg.h"
 #include "process.h"
 #include "queue.h"
@@ -11,18 +12,19 @@
 #include <stdlib.h>
 #include <time.h>
 
-void init_fcfs() {
+
+void init_sjf() {
     process_core = create_scheduler();
     check(process_core, "failed to create scheduler");
-    process_core->scheduler_core = schedular_fifo;
-    process_core->wakeUp_core = wakeUp_fifo;
-    process_core->add_arrival_core = add_arrival_process_fifo;
+    process_core->scheduler_core = schedular_sjf;
+    process_core->wakeUp_core = wakeUp_sjf;
+    process_core->add_arrival_core = add_arrival_process_sjf;
     return;
 error:
     exit(EXIT_FAILURE);
 }
 
-void *add_arrival_process_fifo(burst_data **data) {
+void *add_arrival_process_sjf(burst_data **data) {
     int j = 0;
     int t_process = (*data)->t_process;
     int max_arrTime = (*data)->b_data[t_process - 1]->a_time;
@@ -184,7 +186,7 @@ error:
     exit(EXIT_FAILURE);
 }
 
-void *schedular_fifo() {
+void *schedular_sjf() {
     int i = 0;
     wall_timer = create_timer();
     // int desired = TOTAL_PROCESS;
@@ -254,7 +256,7 @@ void *schedular_fifo() {
     return NULL;
 }
 
-void *wakeUp_fifo() {
+void *wakeUp_sjf() {
     int j = 0;
     while (atomic_load(&TERMINATED_PROCESS) < TOTAL_PROCESS) {
         debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d", atomic_load(&TERMINATED_PROCESS),
