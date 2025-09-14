@@ -10,5 +10,6 @@ void destroy_fcfs();
 
 void *schedular_fifo();
 void *wakeUp_fifo();
+void *add_arrival_process_fifo(burst_data **);
 
 #endif

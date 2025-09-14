@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
     // add_arrival_process(&data);
     // pthread_create(&arrivalThread, NULL, (void *)add_arrival_process, &data);
     // we want to wait for arrival thread to finish before creating schedular thread
-    if (pthread_create(&arrivalThread, NULL, (void *)add_arrival_process, &data) != 0) {
+    if (pthread_create(&arrivalThread, NULL, (void *)process_core->add_arrival_core, &data) != 0) {
         perror("Failed to create arrival thread");
         return 1;
     }
