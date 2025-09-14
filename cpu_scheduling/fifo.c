@@ -1,6 +1,5 @@
 #include "fifo.h"
 #include "dbg.h"
-#include "helper.h"
 #include "process.h"
 #include "queue.h"
 #include "sched_common.h"
@@ -11,9 +10,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-
-timer__t *wall_timer;
-int start_time = 0, end_time = 0;
 
 void init_fcfs() {
     process_core = create_scheduler();

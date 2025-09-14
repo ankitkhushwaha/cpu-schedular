@@ -3,6 +3,9 @@
 #include "fifo.h"
 #include <stdlib.h>
 
+timer__t *wall_timer;
+int start_time = 0, end_time = 0;
+
 scheduler_ops_t *create_scheduler() {
     scheduler_ops_t *sched = calloc(1, sizeof(scheduler_ops_t));
     check_mem(sched);

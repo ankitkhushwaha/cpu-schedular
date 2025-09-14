@@ -1,6 +1,5 @@
 #include "dbg.h"
 #include "file.h"
-#include "helper.h"
 #include "process.h"
 #include "queue.h"
 #include "result.h"
@@ -15,13 +14,13 @@
 Queue *readyQueue;
 Queue *waitQueue;
 Queue *task_list;
-process_t *running_pd;
 atomic_int global_counter = 0;
 int T_PROCESS = 0;
 int TOTAL_PROCESS = 0;
 atomic_int TERMINATED_PROCESS = 0;
 FILE *task_log;
 
+process_t *running_pd;
 process_t *sleeping_pd;
 scheduler_ops_t *process_core;
 

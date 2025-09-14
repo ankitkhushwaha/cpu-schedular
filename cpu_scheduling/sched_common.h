@@ -3,7 +3,10 @@
 
 #include "file.h"
 #include "process.h"
+#include "time_t.h"
 
+extern timer__t *wall_timer;
+extern int start_time, end_time;
 extern void print_usage(const char *prog_name);
 
 typedef struct {
