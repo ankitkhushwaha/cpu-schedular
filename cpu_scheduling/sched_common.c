@@ -23,7 +23,8 @@ void init_scheduler(char *sched_type) {
         init_fcfs_th();
     }
     else if (strcmp(sched_type, "sjf") == 0) {
-        // init_sjf();
+        init_sjf();
+        init_sjf_th();
     }
     // else if (strcmp(sched_type, "priority") == 0) {
     //     init_priority();

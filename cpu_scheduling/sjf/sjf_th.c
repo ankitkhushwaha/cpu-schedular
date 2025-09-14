@@ -2,12 +2,13 @@
 #include "queue.h"
 #include "dbg.h"
 #include "sjf_th.h"
-#include <pthread.h>
 #include "thread_op.h"
+#include <stdlib.h>
+#include <pthread.h>
 
-void init_fcfs_th(){
+void init_sjf_th(){
     thread_core = create_thread_op();
-    check(process_core, "failed to create scheduler");
+    check_mem(thread_core);
     thread_core->add_to_readyQueue_core = add_to_readyQueue_sjf;
     thread_core->add_to_waitQueue_core = add_to_waitQueue_sjf;
     thread_core->add_to_taskList_core = add_to_taskList_sjf;
@@ -57,7 +58,7 @@ process_t *remove_from_waitQueue_sjf() {
     return pd;
 }
 
-process_t *remove_node_by_pid_sjf(Queue *queue, int pid, pthread_mutex_t *mutex) {
+process_t *remove_node_by_pid_t_sjf(Queue *queue, int pid, pthread_mutex_t *mutex) {
     pthread_mutex_lock(mutex);
     process_t *pd = remove_node_by_pid(queue, pid);
     pthread_mutex_unlock(mutex);

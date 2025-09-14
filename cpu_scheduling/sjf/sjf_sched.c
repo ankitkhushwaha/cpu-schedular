@@ -40,8 +40,8 @@ void *add_arrival_process_sjf(burst_data **data) {
             // assert_t((*data)->b_data[j]->a_time == read_global_counter());
             p->process_d->a_time = (*data)->b_data[j]->a_time;
 
-            add_to_readyQueue(p);
-            add_to_taskList(p);
+            add_to_readyQueue_sjf(p);
+            add_to_taskList_sjf(p);
             debug("process %d is added to [ready,task_list] queue at time: %d", j,
                   read_global_counter());
             sem_post(&ready_count);
@@ -114,7 +114,7 @@ static STATUS _process_cpu(process_t **pd) {
 
         (*pd)->cpu_index += 1;
         (*pd)->status = SLEEP;
-        add_to_waitQueue(*pd);
+        add_to_waitQueue_sjf(*pd);
         sem_post(&wait_count);
         _status = SLEEP;
         goto final;
@@ -130,7 +130,7 @@ static STATUS _process_cpu(process_t **pd) {
         (*pd)->cpu_index += 1;
 
         (*pd)->status = SLEEP;
-        add_to_waitQueue(*pd);
+        add_to_waitQueue_sjf(*pd);
         sem_post(&wait_count);
         _status = SLEEP;
         goto final;
@@ -176,7 +176,7 @@ static STATUS _process_io(process_t **pd) {
 
         (*pd)->io_index += 1;
         (*pd)->status = READY;
-        add_to_readyQueue(*pd);
+        add_to_readyQueue_sjf(*pd);
         sem_post(&ready_count);
         return READY;
     }
@@ -235,7 +235,7 @@ void *schedular_sjf() {
             // debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d",
             //      read_term_counter(), TOTAL_PROCESS, i);
 
-            running_pd = remove_from_readyQueue();
+            running_pd = remove_from_readyQueue_sjf();
             if (running_pd) {
                 debug("Process %d is doing cpu with state: %s", running_pd->pid,
                       STATUS_ARR[running_pd->status]);
@@ -292,7 +292,7 @@ void *wakeUp_sjf() {
         // }
         if (sem_trywait(&wait_count) == 0) {
             // debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d",
-            sleeping_pd = remove_from_waitQueue();
+            sleeping_pd = remove_from_waitQueue_sjf();
             if (sleeping_pd) {
                 debug("Process %d is doing io with state: %s", sleeping_pd->pid,
                       STATUS_ARR[sleeping_pd->status]);
