@@ -4,10 +4,10 @@
 #include "process.h"
 #include <stdbool.h>
 
-typedef struct {
+typedef struct Node {
     process_t *data;
     int priority;
-    node *next;
+    struct Node *next;
 } node;
 
 typedef struct {
@@ -24,4 +24,5 @@ process_t *dequeue(Queue *);
 bool isEmpty(Queue *);
 process_t *remove_node_by_pid(Queue *, int);
 void isValidQueue(Queue *);
+void queue_print(Queue *);
 #endif

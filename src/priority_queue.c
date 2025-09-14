@@ -1,63 +1,87 @@
-#include <stdio.h> 
-#include <stdlib.h> 
+#include "dbg.h"
+#include "process.h"
+#include "queue.h"
+#include <stdlib.h>
 
-// typedef struct node { 
-//     int data; 
-//     int priority; 
-//     struct node* next; 
-// } Node; 
+Queue *p_queue_create() { return queue_create(); }
 
-Node* newNode(int d, int p) { 
-    Node* temp = (Node*)malloc(sizeof(Node)); 
-    temp->data = d; 
-    temp->priority = p; 
-    temp->next = NULL; 
-    return temp; 
-} 
+node *p_newNode(process_t *pd, int priority) {
+    node *temp = (node *)malloc(sizeof(node));
+    temp->data = pd;
+    temp->priority = priority;
+    temp->next = NULL;
+    return temp;
+}
 
-int peek(Node* head) {
-    return head->data; 
-} 
+process_t *p_dequeue(Queue *queue) { return dequeue(queue); }
 
-Node* pop(Node* head) {
-    Node* temp = head; 
-    head = head->next; 
-    free(temp); 
-    return head; 
-} 
+bool p_isEmpty(Queue *queue) { return isEmpty(queue); }
 
-Node* push(Node* head, int d, int p) { 
-    Node* start = head; 
-    Node* temp = newNode(d, p); 
+process_t *p_remove_node_by_pid(Queue *queue, int pid) { return remove_node_by_pid(queue, pid); }
 
-    if (head->priority > p) { 
-        temp->next = head; 
-        head = temp; 
-    } 
-    else { 
-        while (start->next != NULL && start->next->priority < p) { 
-            start = start->next; 
-        } 
-        temp->next = start->next; 
-        start->next = temp; 
-    } 
-    return head; 
-} 
+void p_isValidQueue(Queue *queue) { isValidQueue(queue); }
 
-int isEmpty(Node* head) { 
-    return (head == NULL); 
-} 
+node *p_enqueue(Queue *queue, process_t *pd, int priority) {
+    isValidQueue(queue);
+    node *newnode = p_newNode(pd, priority);
+    if (isEmpty(queue)) {
+        queue->front = queue->rear = newnode;
+        queue->len++;
 
-// int main() { 
-//     Node* pq = newNode(4, 1); 
-//     pq = push(pq, 5, 2); 
-//     pq = push(pq, 6, 3); 
-//     pq = push(pq, 7, 0); 
+        assert_t(queue->front == queue->rear);
+        assert_t(queue->front == newnode);
+        return queue->front;
+    }
+    // check for front pid
+    if (queue->front->priority > priority) {
+        newnode->next = queue->front;
+        queue->front = newnode;
+        queue->len++;
 
-//     while (!isEmpty(pq)) { 
-//         printf("%d ", peek(pq)); 
-//         pq = pop(pq); 
-//     } 
+        assert_t(queue->front == newnode);
+        return newnode;
+    }
+    node *tnode, *snode;
+    Traverse(tnode, queue) {
+        snode = tnode->next;
+        if (!snode)
+            break;
+        debug("snode->priority: %d, Node priority: %d", snode->priority, priority);
+        if (snode->priority > priority) {
+            break;
+        }
+    }
+    if (!snode) {
+        assert_t(queue->rear == tnode);
+        queue->rear->next = newnode;
+        queue->rear = newnode;
+        queue->len++;
+        assert_t(queue->rear == newnode);
+        return queue->front;
+    }
+    tnode->next = newnode;
+    newnode->next = snode;
+    queue->len++;
+    return queue->front;
+}
 
-//     return 0; 
+void p_queue_print(Queue *queue) {
+    isValidQueue(queue);
+    node *tnode;
+    debug("printing priority queue");
+    Traverse(tnode, queue) { printf("(%d | %d) ", tnode->data->pid, tnode->priority); }
+    printf("%d | %d\n", tnode->data->pid, tnode->priority);
+}
+// int main() {
+//     node* pq = newNode(4, 1);
+//     pq = push(pq, 5, 2);
+//     pq = push(pq, 6, 3);
+//     pq = push(pq, 7, 0);
+
+//     while (!isEmpty(pq)) {
+//         printf("%d ", peek(pq));
+//         pq = pop(pq);
+//     }
+
+//     return 0;
 // }
