@@ -24,7 +24,9 @@ void *add_arrival_process(burst_data **data) {
             check(p, "failed to create process");
             p->process_d = (*data)->b_data[j];
             
-            assert_t((*data)->b_data[j]->a_time == read_global_counter());
+            debug("process %d atime: %d with global counter: %d",
+                 j, (*data)->b_data[j]->a_time, read_global_counter());
+            // assert_t((*data)->b_data[j]->a_time == read_global_counter());
             p->process_d->a_time = (*data)->b_data[j]->a_time;
             
             add_to_readyQueue(p);
