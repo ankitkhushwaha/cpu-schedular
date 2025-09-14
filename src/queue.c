@@ -81,39 +81,6 @@ process_t *dequeue(Queue *queue) {
     return data;
 }
 
-// process_t *remove_node_by_pid(Queue *queue, int pid) {
-//     if (isEmpty(queue)) {
-//         debug("queue is empty");
-//         return NULL;
-//     }
-
-//     node *curr = queue->front;
-//     node *prev = NULL;
-
-//     while (curr) {
-//         if (curr->data->pid == pid) {
-//             // Update front/rear
-//             if (curr == queue->front)
-//                 queue->front = curr->next;
-//             else
-//                 prev->next = curr->next;
-
-//             if (curr == queue->rear)
-//                 queue->rear = prev;
-
-//             process_t *pdata = curr->data;
-//             free(curr);   // free the node
-//             queue->len--;
-//             return pdata;
-//         }
-//         prev = curr;
-//         curr = curr->next;
-//     }
-
-//     debug("process %d not found", pid);
-//     return NULL;
-// }
-
 process_t *remove_node_by_pid(Queue *queue, int pid) {
     isValidQueue(queue);
     if (isEmpty(queue)) {
@@ -206,35 +173,3 @@ void isValidQueue(Queue *queue) {
     }
     debug("Queue is valid");
 }
-// int main(int argc, char *argv[])
-// {
-//     Queue *queue = queue_create();
-//     enqueue(queue, 2);
-//     enqueue(queue, 3);
-//     enqueue(queue, 4);
-
-//     // int arr[] = {2, 3, 4};
-//     // validate_list(list, arr, 3);
-
-//     queue_print(queue);
-
-//     dequeue(queue);
-//     dequeue(queue);
-//     dequeue(queue);
-//     queue_print(queue);
-// dequeue(queue);
-// list_RemoveFromEnd(list);
-// list_print(list);
-// list_add(list, 5);
-
-// int arr2[] = {2, 3, 5};
-// validate_list(list, arr2, 3);
-
-// list_RemoveFromFront(list);
-// list_add(list, 1);
-
-// int arr3[] = {3, 5, 1};
-// validate_list(list, arr3, 3);
-
-// list_print(list);
-// }

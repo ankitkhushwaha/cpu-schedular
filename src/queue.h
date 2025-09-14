@@ -4,15 +4,16 @@
 #include "process.h"
 #include <stdbool.h>
 
-typedef struct Node {
+typedef struct {
     process_t *data;
-    struct Node *next;
+    int priority;
+    node *next;
 } node;
 
 typedef struct {
     int len;
-    struct Node *front;
-    struct Node *rear;
+    node *front;
+    node *rear;
 } Queue;
 
 #define Traverse(tnode, queue) for (tnode = queue->front; tnode->next != NULL; tnode = tnode->next)

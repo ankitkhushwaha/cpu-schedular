@@ -1,4 +1,3 @@
-create genric ds for genric enqueue, dequeue operation as below algos
 add support for rest of algos
 add support for multiple cpu
 write report
