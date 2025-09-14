@@ -2,6 +2,7 @@
 #include "time_t.h"
 #include <time.h> 
 #include <stdlib.h>
+#include <stdbool.h>
 
 
 timer__t *create_timer() {
@@ -38,6 +39,9 @@ struct timespec timespec_add(struct timespec t1, struct timespec t2) {
     return result;
 }
 
-void print_time(struct timespec t, char *clockType) {
-    debug("%s: %ld.%09ld\n", clockType, t.tv_sec, t.tv_nsec);
+void print_time(struct timespec t, char *clockType, bool res) {
+    if (res)
+        debug("%s: %ld.%09ld\n", clockType, t.tv_sec, t.tv_nsec);
+    else
+        printf("%s: %ld.%09ld\n", clockType, t.tv_sec, t.tv_nsec);
 }

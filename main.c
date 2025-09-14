@@ -1,6 +1,7 @@
 #include "cpu_thread.h"
 #include "dbg.h"
 #include "file.h"
+#include "result.h"
 #include "process.h"
 #include "queue.h"
 #include "thread_op.h"
@@ -121,7 +122,7 @@ int main(int argc, char *argv[]) {
     pthread_join(wakeupThread, NULL);
     pthread_join(schedularThread, NULL);
     // wake_up();
-
+    write_result();
     sem_destroy(&wait_count);
     sem_destroy(&ready_count);
     pthread_mutex_destroy(&readyQueue_mutex);

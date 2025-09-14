@@ -75,7 +75,7 @@ static STATUS _process_cpu(process_t **pd) {
     
     STATUS _status;
     clock_gettime(CLOCK_REALTIME, &wall_timer->start);
-    print_time(wall_timer->start, "START");
+    print_time(wall_timer->start, "START", true);
     if (_should_terminate(*pd)) {
         debug("Process %d will be terminated", (*pd)->pid);
         update_term_counter(1);
@@ -129,9 +129,9 @@ final:
     if (_status!= TERMINATED && _status!= UNDEFINED)
         write_cpu_process_data(*pd, start_time, end_time);
     clock_gettime(CLOCK_REALTIME, &wall_timer->end);
-    print_time(wall_timer->end, "END");
+    print_time(wall_timer->end, "END", true);
     struct timespec diff = diff_timespec(wall_timer);
-    print_time(diff, "diff_Time");
+    print_time(diff, "diff_Time", true);
     (*pd)->wall_time = timespec_add((*pd)->wall_time, diff);
     return _status;
 

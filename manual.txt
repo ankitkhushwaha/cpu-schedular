@@ -1,4 +1,5 @@
 implement ouptut.file
+global time sync issue
 add data structure for turnaround time and other param
 create genric ds for genric enqueue, dequeue operation as below algos
 add support for multiple cpu

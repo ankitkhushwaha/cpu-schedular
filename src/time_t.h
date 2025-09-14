@@ -2,6 +2,7 @@
 #define TIME_T_H
 
 #include <time.h>
+#include <stdbool.h>
 
 typedef struct {
     struct timespec start, end;
@@ -10,6 +11,6 @@ typedef struct {
 timer__t *create_timer();
 struct timespec diff_timespec(timer__t *);
 struct timespec timespec_add(struct timespec, struct timespec);
-void print_time(struct timespec, char *);
+void print_time(struct timespec, char *, bool);
 
 #endif
