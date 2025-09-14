@@ -1,5 +1,5 @@
-#ifndef CPU_THREAD_H
-#define CPU_THREAD_H
+#ifndef HELPER_H
+#define HELPER_H
 
 #include "file.h"
 #include "process.h"
@@ -27,8 +27,5 @@ extern process_t *running_pd;
 extern sem_t wait_count;
 extern sem_t ready_count;
 
-void *schedular();
-void *wake_up();
 void *add_arrival_process(burst_data **);
-
 #endif

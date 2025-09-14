@@ -1,9 +1,10 @@
-#include "cpu_thread.h"
 #include "dbg.h"
 #include "file.h"
+#include "helper.h"
 #include "process.h"
 #include "queue.h"
 #include "result.h"
+#include "sched_common.h"
 #include "thread_op.h"
 #include <pthread.h>
 #include <semaphore.h>
@@ -22,6 +23,7 @@ atomic_int TERMINATED_PROCESS = 0;
 FILE *task_log;
 
 process_t *sleeping_pd;
+scheduler_ops_t *process_core;
 
 extern void queue_print(Queue *queue);
 extern void isValidQueue(Queue *queue);
@@ -41,22 +43,6 @@ void print_usage(const char *prog_name) {
     printf("  priority - Priority scheduling\n");
     printf("  rr      - Round Robin\n");
 }
-
-// void init_scheduler(const char *scheduler) {
-//     if (strcmp(scheduler, "fcfs") == 0) {
-//         init_fcfs();
-//     } else if (strcmp(scheduler, "sjf") == 0) {
-//         init_sjf();
-//     } else if (strcmp(scheduler, "priority") == 0) {
-//         init_priority();
-//     } else if (strcmp(scheduler, "rr") == 0) {
-//         init_rr();
-//     } else {
-//         printf("Error: Unknown scheduler '%s'\n\n", scheduler);
-//         print_usage("./cpu_scheduler");
-//         exit(1);
-//     }
-// }
 
 int main(int argc, char *argv[]) {
     // if (argc != 3) {
@@ -78,7 +64,7 @@ int main(int argc, char *argv[]) {
     check(data != NULL, "Failed to read input file '%s'", input_file);
     TOTAL_PROCESS = data->t_process;
     init_queues();
-
+    init_scheduler("fcfs");
     pthread_t arrivalThread, schedularThread, wakeupThread;
     sem_init(&wait_count, 0, 0);
     sem_init(&ready_count, 0, 0);
@@ -92,12 +78,12 @@ int main(int argc, char *argv[]) {
     }
     pthread_join(arrivalThread, NULL);
 
-    if (pthread_create(&schedularThread, NULL, (void *)schedular, NULL) != 0) {
+    if (pthread_create(&schedularThread, NULL, (void *)process_core->scheduler_core, NULL) != 0) {
         perror("Failed to create schedular thread");
         return 1;
     }
 
-    if (pthread_create(&wakeupThread, NULL, (void *)wake_up, NULL) != 0) {
+    if (pthread_create(&wakeupThread, NULL, (void *)process_core->wakeUp_core, NULL) != 0) {
         perror("Failed to create wake_up thread");
         return 1;
     }
