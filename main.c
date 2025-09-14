@@ -1,9 +1,9 @@
 #include "cpu_thread.h"
 #include "dbg.h"
 #include "file.h"
-#include "result.h"
 #include "process.h"
 #include "queue.h"
+#include "result.h"
 #include "thread_op.h"
 #include <pthread.h>
 #include <semaphore.h>

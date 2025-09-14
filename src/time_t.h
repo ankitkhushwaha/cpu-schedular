@@ -1,8 +1,8 @@
 #ifndef TIME_T_H
 #define TIME_T_H
 
-#include <time.h>
 #include <stdbool.h>
+#include <time.h>
 
 typedef struct {
     struct timespec start, end;

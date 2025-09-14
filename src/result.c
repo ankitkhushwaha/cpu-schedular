@@ -1,9 +1,9 @@
-#include "process.h"
 #include "result.h"
+#include "process.h"
 #include "time_t.h"
 #include <time.h>
 
-void write_result(){
+void write_result() {
     int t_avg = 0, t_max = 0;
     struct timespec ts = {0, 0};
 
@@ -19,6 +19,6 @@ void write_result(){
 
     t_avg /= TOTAL_PROCESS;
 
-    printf("Turnaround Average: %d, Turnaround Maximum: %d\n",t_avg, t_max);
+    printf("Turnaround Average: %d, Turnaround Maximum: %d\n", t_avg, t_max);
     print_time(ts, "Wall Time", false);
 }

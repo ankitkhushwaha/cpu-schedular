@@ -3,12 +3,12 @@
 #include "process.h"
 #include "queue.h"
 #include "thread_op.h"
+#include "time_t.h"
 #include <stdatomic.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "time_t.h"
 
 timer__t *wall_timer;
 int start_time, end_time;
@@ -23,12 +23,12 @@ void *add_arrival_process(burst_data **data) {
             process_t *p = create_process();
             check(p, "failed to create process");
             p->process_d = (*data)->b_data[j];
-            
-            debug("process %d atime: %d with global counter: %d",
-                 j, (*data)->b_data[j]->a_time, read_global_counter());
+
+            debug("process %d atime: %d with global counter: %d", j, (*data)->b_data[j]->a_time,
+                  read_global_counter());
             // assert_t((*data)->b_data[j]->a_time == read_global_counter());
             p->process_d->a_time = (*data)->b_data[j]->a_time;
-            
+
             add_to_readyQueue(p);
             add_to_taskList(p);
             debug("process %d is added to [ready,task_list] queue at time: %d", j,
@@ -74,7 +74,7 @@ static bool _should_terminate(process_t *pd) {
 
 static STATUS _process_cpu(process_t **pd) {
     check(*pd, "Process given to use is NULL");
-    
+
     STATUS _status;
     clock_gettime(CLOCK_REALTIME, &wall_timer->start);
     print_time(wall_timer->start, "START", true);
@@ -83,24 +83,24 @@ static STATUS _process_cpu(process_t **pd) {
         update_term_counter(1);
         (*pd)->status = TERMINATED;
 
-        debug("process time: %d, arrival time: %d, global_time: %d", 
-            (*pd)->process_time, (*pd)->process_d->a_time, read_global_counter());
+        debug("process time: %d, arrival time: %d, global_time: %d", (*pd)->process_time,
+              (*pd)->process_d->a_time, read_global_counter());
         (*pd)->turnaround_time = (*pd)->process_time;
         assert_t((*pd)->turnaround_time >= 0);
         debug("turnaround time: %d", (*pd)->turnaround_time);
         debug("Process %d is terminated", (*pd)->pid);
-        
-        _status =  TERMINATED;
+
+        _status = TERMINATED;
         goto final;
     }
-    
+
     if ((*pd)->status == NEW) {
         start_time = read_global_counter();
         (*pd)->cpu_time = (*pd)->process_d->cpu_burst[0];
         update_global_counter((*pd)->process_d->cpu_burst[0]);
         end_time = read_global_counter();
         (*pd)->process_time += (*pd)->process_d->cpu_burst[0];
-        
+
         (*pd)->cpu_index += 1;
         (*pd)->status = SLEEP;
         add_to_waitQueue(*pd);
@@ -117,7 +117,7 @@ static STATUS _process_cpu(process_t **pd) {
         update_global_counter((*pd)->process_d->cpu_burst[(*pd)->cpu_index]);
         end_time = read_global_counter();
         (*pd)->cpu_index += 1;
-        
+
         (*pd)->status = SLEEP;
         add_to_waitQueue(*pd);
         sem_post(&wait_count);
@@ -128,7 +128,7 @@ static STATUS _process_cpu(process_t **pd) {
     _status = UNDEFINED;
 
 final:
-    if (_status!= TERMINATED && _status!= UNDEFINED)
+    if (_status != TERMINATED && _status != UNDEFINED)
         write_cpu_process_data(*pd, start_time, end_time);
     clock_gettime(CLOCK_REALTIME, &wall_timer->end);
     print_time(wall_timer->end, "END", true);
@@ -148,8 +148,8 @@ static STATUS _process_io(process_t **pd) {
         update_term_counter(1);
         (*pd)->status = TERMINATED;
 
-        debug("cpu usage time: %d, arrival time: %d, global_time: %d", 
-            (*pd)->process_time, (*pd)->process_d->a_time, read_global_counter());
+        debug("cpu usage time: %d, arrival time: %d, global_time: %d", (*pd)->process_time,
+              (*pd)->process_d->a_time, read_global_counter());
         (*pd)->turnaround_time = (*pd)->process_time;
         assert_t((*pd)->turnaround_time >= 0);
         debug("turnaround time: %d", (*pd)->turnaround_time);
@@ -162,7 +162,7 @@ static STATUS _process_io(process_t **pd) {
         (*pd)->io_time += (*pd)->process_d->io_burst[(*pd)->io_index];
         update_global_counter((*pd)->process_d->io_burst[(*pd)->io_index]);
         (*pd)->process_time += (*pd)->process_d->io_burst[(*pd)->io_index];
-        
+
         (*pd)->io_index += 1;
         (*pd)->status = READY;
         add_to_readyQueue(*pd);

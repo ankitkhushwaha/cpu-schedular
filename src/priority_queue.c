@@ -1,5 +1,5 @@
-#include<stdio.h>
-#include<stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 struct PQNode {
     int data;
@@ -7,20 +7,20 @@ struct PQNode {
 };
 
 struct PriorityQueue {
-    struct PQNode* array;
+    struct PQNode *array;
     int capacity;
     int size;
 };
 
-struct PriorityQueue* createPriorityQueue(int capacity) {
-    struct PriorityQueue* pq = (struct PriorityQueue*) malloc(sizeof(struct PriorityQueue));
+struct PriorityQueue *createPriorityQueue(int capacity) {
+    struct PriorityQueue *pq = (struct PriorityQueue *)malloc(sizeof(struct PriorityQueue));
     if (!pq) {
         printf("Memory allocation failed.\n");
         exit(1);
     }
     pq->capacity = capacity;
     pq->size = 0;
-    pq->array = (struct PQNode*) malloc(capacity * sizeof(struct PQNode));
+    pq->array = (struct PQNode *)malloc(capacity * sizeof(struct PQNode));
     if (!pq->array) {
         printf("Memory allocation failed.\n");
         free(pq);
@@ -30,17 +30,17 @@ struct PriorityQueue* createPriorityQueue(int capacity) {
 }
 
 // Function to swap two priority queue nodes
-void swap(struct PQNode* a, struct PQNode* b) {
+void swap(struct PQNode *a, struct PQNode *b) {
     struct PQNode temp = *a;
     *a = *b;
     *b = temp;
 }
 
 // Function to heapify a subtree rooted with node i
-void heapify(struct PriorityQueue* pq, int i) {
-    int largest = i;  // Initialize largest as root
+void heapify(struct PriorityQueue *pq, int i) {
+    int largest = i;       // Initialize largest as root
     int left = 2 * i + 1;  // Left child
-    int right = 2 * i + 2;  // Right child
+    int right = 2 * i + 2; // Right child
 
     // If left child is larger than root
     if (left < pq->size && pq->array[left].priority > pq->array[largest].priority)
@@ -58,7 +58,7 @@ void heapify(struct PriorityQueue* pq, int i) {
 }
 
 // Function to insert an element into the priority queue
-void insert(struct PriorityQueue* pq, int data, int priority) {
+void insert(struct PriorityQueue *pq, int data, int priority) {
     if (pq->size == pq->capacity) {
         printf("Priority queue is full. Cannot insert.\n");
         return;
@@ -82,7 +82,7 @@ void insert(struct PriorityQueue* pq, int data, int priority) {
 }
 
 // Function to extract the element with highest priority from the priority queue
-struct PQNode extractMax(struct PriorityQueue* pq) {
+struct PQNode extractMax(struct PriorityQueue *pq) {
     if (pq->size <= 0) {
         printf("Priority queue is empty. Cannot extract.\n");
         struct PQNode emptyNode = {0, 0};
@@ -105,7 +105,7 @@ struct PQNode extractMax(struct PriorityQueue* pq) {
 }
 
 // Function to display the elements of the priority queue
-void displayPriorityQueue(struct PriorityQueue* pq) {
+void displayPriorityQueue(struct PriorityQueue *pq) {
     printf("Priority Queue elements:\n");
     for (int i = 0; i < pq->size; ++i)
         printf("(%d, %d) ", pq->array[i].data, pq->array[i].priority);
@@ -113,7 +113,7 @@ void displayPriorityQueue(struct PriorityQueue* pq) {
 }
 
 // Function to free priority queue memory
-void freePriorityQueue(struct PriorityQueue* pq) {
+void freePriorityQueue(struct PriorityQueue *pq) {
     if (pq) {
         if (pq->array)
             free(pq->array);
@@ -167,7 +167,3 @@ void freePriorityQueue(struct PriorityQueue* pq) {
 
 //     return 0;
 // }
-
-
-							
-

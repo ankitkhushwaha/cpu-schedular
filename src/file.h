@@ -17,5 +17,5 @@ typedef struct burst_data {
 } burst_data;
 
 burst_data *read_burstfile(char *);
-void write_process_data(FILE*, int , int , int , int );
+void write_process_data(FILE *, int, int, int, int);
 #endif
