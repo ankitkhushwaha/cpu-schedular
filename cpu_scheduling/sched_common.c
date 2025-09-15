@@ -4,6 +4,8 @@
 #include "fifo_th.h"
 #include "sjf_sched.h"
 #include "sjf_th.h"
+#include "srtf_sched.h"
+#include "srtf_th.h"
 #include <stdlib.h>
 
 timer__t *wall_timer;
@@ -24,10 +26,11 @@ void init_scheduler(char *sched_type) {
     } else if (strcmp(sched_type, "sjf") == 0) {
         init_sjf();
         init_sjf_th();
+    } else if (strcmp(sched_type, "srtf") == 0) {
+        init_srtf();
+        init_srtf_th();
     }
-    // else if (strcmp(sched_type, "priority") == 0) {
-    //     init_priority();
-    // } else if (strcmp(sched_type, "rr") == 0) {
+    //  else if (strcmp(sched_type, "rr") == 0) {
     //     init_rr();
     // }
     else {

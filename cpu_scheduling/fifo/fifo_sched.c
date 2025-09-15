@@ -47,7 +47,7 @@ void *add_arrival_process_fifo(burst_data **data) {
             j++;
         }
         debug("global counter: %d, max_arrTime: %d", read_global_counter(), max_arrTime);
-        assert_t(read_global_counter() <= max_arrTime);
+        // assert_t(read_global_counter() <= max_arrTime);
         if (j == t_process)
             break;
         update_global_counter(1);

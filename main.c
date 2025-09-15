@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
     check(data != NULL, "Failed to read input file '%s'", input_file);
     TOTAL_PROCESS = data->t_process;
     init_queues();
-    init_scheduler("sjf");
+    init_scheduler("srtf");
     pthread_t arrivalThread, schedularThread, wakeupThread;
     sem_init(&wait_count, 0, 0);
     sem_init(&ready_count, 0, 0);
@@ -76,7 +76,6 @@ int main(int argc, char *argv[]) {
         perror("Failed to create arrival thread");
         return 1;
     }
-    pthread_join(arrivalThread, NULL);
 
     if (pthread_create(&schedularThread, NULL, (void *)process_core->scheduler_core, NULL) != 0) {
         perror("Failed to create schedular thread");
@@ -87,6 +86,7 @@ int main(int argc, char *argv[]) {
         perror("Failed to create wake_up thread");
         return 1;
     }
+    pthread_join(arrivalThread, NULL);
     // schedular();
     // process_t *pd = remove_node_by_pid(readyQueue, 0);
     // isValidQueue(readyQueue);

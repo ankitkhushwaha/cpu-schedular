@@ -1,9 +1,9 @@
-#include "sjf_sched.h"
+#include "srtf_sched.h"
 #include "dbg.h"
 #include "process.h"
 #include "queue.h"
 #include "sched_common.h"
-#include "sjf_th.h"
+#include "srtf_th.h"
 #include "thread_op.h"
 #include "time_t.h"
 #include <stdatomic.h>
@@ -12,18 +12,18 @@
 #include <stdlib.h>
 #include <time.h>
 
-void init_sjf() {
+void init_srtf() {
     process_core = create_scheduler();
     check(process_core, "failed to create scheduler");
-    process_core->scheduler_core = schedular_sjf;
-    process_core->wakeUp_core = wakeUp_sjf;
-    process_core->add_arrival_core = add_arrival_process_sjf;
+    process_core->scheduler_core = schedular_srtf;
+    process_core->wakeUp_core = wakeUp_srtf;
+    process_core->add_arrival_core = add_arrival_process_srtf;
     return;
 error:
     exit(EXIT_FAILURE);
 }
 
-void *add_arrival_process_sjf(burst_data **data) {
+void *add_arrival_process_srtf(burst_data **data) {
     int j = 0;
     int t_process = (*data)->t_process;
     int max_arrTime = (*data)->b_data[t_process - 1]->a_time;
@@ -40,8 +40,8 @@ void *add_arrival_process_sjf(burst_data **data) {
             p->process_d->a_time = (*data)->b_data[j]->a_time;
 
             p->priority = (*data)->b_data[j]->cpu_burst[0];
-            add_to_readyQueue_sjf(p);
-            add_to_taskList_sjf(p);
+            add_to_readyQueue_srtf(p);
+            add_to_taskList_srtf(p);
             debug("process %d is added to [ready,task_list] queue at time: %d", j,
                   read_global_counter());
             sem_post(&ready_count);
@@ -114,7 +114,7 @@ static STATUS _process_cpu(process_t **pd) {
 
         (*pd)->cpu_index += 1;
         (*pd)->status = SLEEP;
-        add_to_waitQueue_sjf(*pd);
+        add_to_waitQueue_srtf(*pd);
         sem_post(&wait_count);
         _status = SLEEP;
         goto final;
@@ -130,7 +130,7 @@ static STATUS _process_cpu(process_t **pd) {
         (*pd)->cpu_index += 1;
 
         (*pd)->status = SLEEP;
-        add_to_waitQueue_sjf(*pd);
+        add_to_waitQueue_srtf(*pd);
         sem_post(&wait_count);
         _status = SLEEP;
         goto final;
@@ -176,7 +176,7 @@ static STATUS _process_io(process_t **pd) {
 
         (*pd)->io_index += 1;
         (*pd)->status = READY;
-        add_to_readyQueue_sjf(*pd);
+        add_to_readyQueue_srtf(*pd);
         sem_post(&ready_count);
         return READY;
     }
@@ -186,7 +186,7 @@ error:
     exit(EXIT_FAILURE);
 }
 
-void *schedular_sjf() {
+void *schedular_srtf() {
     int i = 0;
     wall_timer = create_timer();
     // int desired = TOTAL_PROCESS;
@@ -235,7 +235,7 @@ void *schedular_sjf() {
             // debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d",
             //      read_term_counter(), TOTAL_PROCESS, i);
 
-            running_pd = remove_from_readyQueue_sjf();
+            running_pd = remove_from_readyQueue_srtf();
             if (running_pd) {
                 debug("Process %d is doing cpu with state: %s", running_pd->pid,
                       STATUS_ARR[running_pd->status]);
@@ -256,7 +256,7 @@ void *schedular_sjf() {
     return NULL;
 }
 
-void *wakeUp_sjf() {
+void *wakeUp_srtf() {
     int j = 0;
     while (atomic_load(&TERMINATED_PROCESS) < TOTAL_PROCESS) {
         debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d", atomic_load(&TERMINATED_PROCESS),
@@ -292,7 +292,7 @@ void *wakeUp_sjf() {
         // }
         if (sem_trywait(&wait_count) == 0) {
             // debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d",
-            sleeping_pd = remove_from_waitQueue_sjf();
+            sleeping_pd = remove_from_waitQueue_srtf();
             if (sleeping_pd) {
                 debug("Process %d is doing io with state: %s", sleeping_pd->pid,
                       STATUS_ARR[sleeping_pd->status]);
