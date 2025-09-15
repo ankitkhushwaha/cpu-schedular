@@ -46,13 +46,13 @@ void print_usage(const char *prog_name) {
 }
 
 int main(int argc, char *argv[]) {
-    // if (argc != 3) {
-    //     print_usage(argv[0]);
-    //     return 1;
-    // }
+    if (argc != 3) {
+        print_usage(argv[0]);
+        return 1;
+    }
 
-    // char *scheduler = argv[1];
-    char *input_file = argv[1];
+    char *scheduler = argv[1];
+    char *input_file = argv[2];
 
     task_log = fopen("task_log.txt", "w");
     if (!task_log) {
@@ -61,11 +61,14 @@ int main(int argc, char *argv[]) {
     }
     fprintf(task_log, "CPU0\n");
     fflush(task_log);
+
     // Read the input file
     burst_data *data = read_burstfile(input_file);
     check(data != NULL, "Failed to read input file '%s'", input_file);
     TOTAL_PROCESS = data->t_process;
-    init_scheduler("srtf");
+
+    init_scheduler(scheduler);
+
     pthread_t arrivalThread, schedularThread, wakeupThread;
     sem_init(&wait_count, 0, 0);
     sem_init(&ready_count, 0, 0);

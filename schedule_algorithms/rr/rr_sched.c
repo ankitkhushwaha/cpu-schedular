@@ -1,8 +1,8 @@
 #include "rr_sched.h"
 #include "dbg.h"
-#include "rr_th.h"
 #include "process.h"
 #include "queue.h"
+#include "rr_th.h"
 #include "sched_common.h"
 #include "thread_op.h"
 #include "time_t.h"
@@ -127,14 +127,14 @@ static STATUS _process_cpu(process_t **pd) {
         (*pd)->status = READY;
         add_to_readyQueue_rr(*pd);
         sem_post(&ready_count);
-        
+
         write_cpu_process_data(*pd, start_time, end_time);
         running_pd = *pd = remove_from_readyQueue_rr();
         debug("Process %d is running with state: %s", (*pd)->pid, STATUS_ARR[(*pd)->status]);
         _status = _process_cpu(&running_pd);
         goto final;
     }
-    
+
     (*pd)->cpu_index += 1;
 
     if ((*pd)->cpu_index < (*pd)->process_d->cpu_burst_size) {
@@ -150,7 +150,7 @@ static STATUS _process_cpu(process_t **pd) {
 
     debug("Process %d with invalid state: %s given", (*pd)->pid, STATUS_ARR[(*pd)->status]);
     _status = UNDEFINED;
-    
+
 final:
     if (_status != TERMINATED && _status != UNDEFINED) {
         assert_t(_status == SLEEP);

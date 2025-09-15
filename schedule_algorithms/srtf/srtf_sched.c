@@ -140,7 +140,7 @@ static STATUS _process_cpu(process_t **pd) {
         if (_simulate_srtf()) {
             debug("_simulate_srtf got triggered");
             end_time = read_global_counter();
-            
+
             write_cpu_process_data(*pd, start_time, end_time);
             goto swap;
         }
