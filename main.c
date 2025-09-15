@@ -64,8 +64,7 @@ int main(int argc, char *argv[]) {
     burst_data *data = read_burstfile(input_file);
     check(data != NULL, "Failed to read input file '%s'", input_file);
     TOTAL_PROCESS = data->t_process;
-    init_queues();
-    init_scheduler("rr");
+    init_scheduler("srtf");
     pthread_t arrivalThread, schedularThread, wakeupThread;
     sem_init(&wait_count, 0, 0);
     sem_init(&ready_count, 0, 0);

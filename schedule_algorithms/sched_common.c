@@ -8,6 +8,7 @@
 #include "sjf_th.h"
 #include "srtf_sched.h"
 #include "srtf_th.h"
+#include "thread_op.h"
 #include <stdlib.h>
 
 timer__t *wall_timer;
@@ -22,6 +23,7 @@ error:
 }
 
 void init_scheduler(char *sched_type) {
+    init_queues();
     if (strcmp(sched_type, "fcfs") == 0) {
         init_fcfs_sched();
         init_fcfs_th();
@@ -33,6 +35,7 @@ void init_scheduler(char *sched_type) {
         init_srtf_th();
     } else if (strcmp(sched_type, "rr") == 0) {
         init_rr();
+        init_rr_th();
     } else {
         printf("Error: Unknown scheduler '%s'\n\n", sched_type);
         print_usage("./cpu_scheduler");
