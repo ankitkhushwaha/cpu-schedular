@@ -59,7 +59,7 @@ process_t *dequeue(Queue *queue) {
     // Only 2 elements
     if (queue->len == 2) {
         node *tnode = queue->front;
-        
+
         queue->front->next = NULL;
         queue->front = queue->rear;
 

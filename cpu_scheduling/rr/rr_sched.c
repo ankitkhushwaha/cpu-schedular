@@ -2,8 +2,8 @@
 #include "dbg.h"
 #include "process.h"
 #include "queue.h"
-#include "sched_common.h"
 #include "rr_th.h"
+#include "sched_common.h"
 #include "thread_op.h"
 #include "time_t.h"
 #include <stdatomic.h>
@@ -28,11 +28,12 @@ static bool _simulate_rr() {
     pthread_mutex_lock(&readyQueue_mutex);
 
     if (running_pd && !isEmpty(readyQueue) &&
-     (readyQueue->front->data->remaining_time < running_pd->remaining_time)){
+        (readyQueue->front->data->remaining_time < running_pd->remaining_time)) {
         debug("simulating strf");
-        debug("readyQueue->front: %d | running_pd: %d", readyQueue->front->data->pid, running_pd->pid);
-        debug("readyQueue remaining_time: %d | running_pd remaining_time: %d", 
-            readyQueue->front->data->remaining_time, running_pd->remaining_time);
+        debug("readyQueue->front: %d | running_pd: %d", readyQueue->front->data->pid,
+              running_pd->pid);
+        debug("readyQueue remaining_time: %d | running_pd remaining_time: %d",
+              readyQueue->front->data->remaining_time, running_pd->remaining_time);
         should_run = true;
     }
     pthread_mutex_unlock(&readyQueue_mutex);
@@ -122,24 +123,24 @@ static STATUS _process_cpu(process_t **pd) {
         _status = TERMINATED;
         goto final;
     }
-    
+
     assert_t((*pd)->status == NEW || (*pd)->status == READY);
-    if ((*pd)->status == NEW){
+    if ((*pd)->status == NEW) {
         assert_t((*pd)->cpu_index == 0);
     }
-    
+
     int time = 0, proc_time = 0;
     bool should_run = false;
     start_time = read_global_counter();
     proc_time = (*pd)->process_d->cpu_burst[(*pd)->cpu_index];
-    while (time < proc_time){
+    while (time < proc_time) {
         (*pd)->cpu_time++;
         (*pd)->process_time++;
         (*pd)->remaining_time--;
         update_global_counter(1);
         time++;
         should_run = _simulate_rr();
-        if (should_run){
+        if (should_run) {
             debug("_simulate_rr got triggered");
             end_time = read_global_counter();
             goto swap;
@@ -148,7 +149,7 @@ static STATUS _process_cpu(process_t **pd) {
     end_time = read_global_counter();
     (*pd)->cpu_index += 1;
 
-    if ((*pd)->cpu_index < (*pd)->process_d->cpu_burst_size){
+    if ((*pd)->cpu_index < (*pd)->process_d->cpu_burst_size) {
         pthread_mutex_lock(&task_list_mutex);
         (*pd)->priority = (*pd)->process_d->cpu_burst[(*pd)->cpu_index];
         pthread_mutex_unlock(&task_list_mutex);
@@ -159,7 +160,7 @@ static STATUS _process_cpu(process_t **pd) {
     sem_post(&wait_count);
     _status = SLEEP;
     goto final;
-    
+
 swap:
     pthread_mutex_lock(&task_list_mutex);
     (*pd)->priority = (*pd)->remaining_time;
@@ -176,7 +177,7 @@ swap:
     _status = UNDEFINED;
 
 final:
-    if (_status != TERMINATED && _status != UNDEFINED){
+    if (_status != TERMINATED && _status != UNDEFINED) {
         assert_t(_status == SLEEP);
         write_cpu_process_data(*pd, start_time, end_time);
         fflush(task_log);

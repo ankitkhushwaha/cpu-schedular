@@ -1,8 +1,8 @@
 #include "fifo_th.h"
 #include "dbg.h"
+#include "priority_queue.h"
 #include "process.h"
 #include "queue.h"
-#include "priority_queue.h"
 #include "thread_op.h"
 #include <pthread.h>
 #include <stdlib.h>

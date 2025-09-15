@@ -139,7 +139,7 @@ static STATUS _process_cpu(process_t **pd) {
     _status = UNDEFINED;
 
 final:
-    if (_status != TERMINATED && _status != UNDEFINED){
+    if (_status != TERMINATED && _status != UNDEFINED) {
         write_cpu_process_data(*pd, start_time, end_time);
         fflush(task_log);
     }

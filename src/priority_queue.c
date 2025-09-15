@@ -20,13 +20,11 @@ bool p_isEmpty(Queue *queue) { return isEmpty(queue); }
 
 process_t *p_remove_node_by_pid(Queue *queue, int pid) { return remove_node_by_pid(queue, pid); }
 
-void p_isValidQueue(Queue *queue) { 
-    isValidQueue(queue); 
-    if (queue->len >= 2){
+void p_isValidQueue(Queue *queue) {
+    isValidQueue(queue);
+    if (queue->len >= 2) {
         node *tnode;
-        Traverse(tnode, queue) {
-            assert_t(tnode->priority <= tnode->next->priority);
-        }
+        Traverse(tnode, queue) { assert_t(tnode->priority <= tnode->next->priority); }
     }
 }
 

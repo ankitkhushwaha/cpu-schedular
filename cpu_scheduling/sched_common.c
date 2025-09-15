@@ -2,12 +2,12 @@
 #include "dbg.h"
 #include "fifo_sched.h"
 #include "fifo_th.h"
+#include "rr_sched.h"
+#include "rr_th.h"
 #include "sjf_sched.h"
 #include "sjf_th.h"
 #include "srtf_sched.h"
 #include "srtf_th.h"
-#include "rr_sched.h"
-#include "rr_th.h"
 #include <stdlib.h>
 
 timer__t *wall_timer;
@@ -31,11 +31,9 @@ void init_scheduler(char *sched_type) {
     } else if (strcmp(sched_type, "srtf") == 0) {
         init_srtf();
         init_srtf_th();
-    }
-     else if (strcmp(sched_type, "rr") == 0) {
+    } else if (strcmp(sched_type, "rr") == 0) {
         init_rr();
-    }
-    else {
+    } else {
         printf("Error: Unknown scheduler '%s'\n\n", sched_type);
         print_usage("./cpu_scheduler");
         exit(1);
