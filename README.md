@@ -27,6 +27,7 @@ It demonstrates how different scheduling policies affect turnaround time, waitin
 ## Requirements
 
 * GCC / Clang
+* GNU Make
 * pthread library (POSIX threads)
 
 ### Tested on
