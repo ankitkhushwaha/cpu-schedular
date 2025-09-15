@@ -23,6 +23,17 @@ C. Preemptive Shortest Job First (SRTF – Shortest Remaining Time First)
     Preemption happens: if a new process arrives with shorter burst than the current one → current is paused and re-enqueued.
     So here dequeue isn’t just at completion—it can happen mid-burst.
 
+    Event-driven approach:
+        Preemption check is triggered only on process arrival.
+        Arrival thread signals the scheduler.
+        Scheduler compares new front vs current.
+
+    Tick-driven approach:
+
+        Every CPU tick, scheduler compares current vs ready_queue.front.
+        If no new arrivals, condition will always fail anyway.
+        If new arrivals, condition succeeds immediately.
+
 D. Round Robin (RR)
     Data structure: simple queue (like FIFO).
     Dequeue rule: head of queue.

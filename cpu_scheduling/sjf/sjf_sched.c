@@ -139,8 +139,10 @@ static STATUS _process_cpu(process_t **pd) {
     _status = UNDEFINED;
 
 final:
-    if (_status != TERMINATED && _status != UNDEFINED)
+    if (_status != TERMINATED && _status != UNDEFINED){
         write_cpu_process_data(*pd, start_time, end_time);
+        fflush(task_log);
+    }
     clock_gettime(CLOCK_REALTIME, &wall_timer->end);
     print_time(wall_timer->end, "END", true);
     struct timespec diff = diff_timespec(wall_timer);

@@ -59,6 +59,7 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
     fprintf(task_log, "CPU0\n");
+    fflush(task_log);
     // Read the input file
     burst_data *data = read_burstfile(input_file);
     check(data != NULL, "Failed to read input file '%s'", input_file);
@@ -71,11 +72,11 @@ int main(int argc, char *argv[]) {
 
     // add_arrival_process(&data);
     // pthread_create(&arrivalThread, NULL, (void *)add_arrival_process, &data);
-    // we want to wait for arrival thread to finish before creating schedular thread
     if (pthread_create(&arrivalThread, NULL, (void *)process_core->add_arrival_core, &data) != 0) {
         perror("Failed to create arrival thread");
         return 1;
     }
+    pthread_join(arrivalThread, NULL);
 
     if (pthread_create(&schedularThread, NULL, (void *)process_core->scheduler_core, NULL) != 0) {
         perror("Failed to create schedular thread");
@@ -86,7 +87,6 @@ int main(int argc, char *argv[]) {
         perror("Failed to create wake_up thread");
         return 1;
     }
-    pthread_join(arrivalThread, NULL);
     // schedular();
     // process_t *pd = remove_node_by_pid(readyQueue, 0);
     // isValidQueue(readyQueue);

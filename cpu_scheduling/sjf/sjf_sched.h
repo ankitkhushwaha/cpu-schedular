@@ -8,6 +8,7 @@
 extern process_t *running_pd;
 extern process_t *sleeping_pd;
 extern scheduler_ops_t *process_core;
+extern FILE *task_log;
 
 extern timer__t *wall_timer;
 extern int start_time, end_time;

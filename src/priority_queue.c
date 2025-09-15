@@ -20,10 +20,18 @@ bool p_isEmpty(Queue *queue) { return isEmpty(queue); }
 
 process_t *p_remove_node_by_pid(Queue *queue, int pid) { return remove_node_by_pid(queue, pid); }
 
-void p_isValidQueue(Queue *queue) { isValidQueue(queue); }
+void p_isValidQueue(Queue *queue) { 
+    isValidQueue(queue); 
+    if (queue->len >= 2){
+        node *tnode;
+        Traverse(tnode, queue) {
+            assert_t(tnode->priority <= tnode->next->priority);
+        }
+    }
+}
 
 node *p_enqueue(Queue *queue, process_t *pd, int priority) {
-    isValidQueue(queue);
+    p_isValidQueue(queue);
     node *newnode = p_newNode(pd, priority);
     if (isEmpty(queue)) {
         queue->front = queue->rear = newnode;
@@ -64,12 +72,12 @@ node *p_enqueue(Queue *queue, process_t *pd, int priority) {
     queue->len++;
 
 final:
-    isValidQueue(queue);
+    p_isValidQueue(queue);
     return queue->front;
 }
 
 void p_queue_print(Queue *queue) {
-    isValidQueue(queue);
+    p_isValidQueue(queue);
     node *tnode;
     debug("printing priority queue");
     Traverse(tnode, queue) { printf("(%d | %d) ", tnode->data->pid, tnode->priority); }

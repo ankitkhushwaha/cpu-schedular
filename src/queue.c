@@ -48,7 +48,7 @@ process_t *dequeue(Queue *queue) {
         return NULL;
     }
     // Only 1 element
-    if (queue->front == queue->rear) {
+    if (queue->len == 1) {
         node *tnode = queue->front;
         queue->front = queue->rear = NULL;
         queue->len--;
@@ -57,11 +57,11 @@ process_t *dequeue(Queue *queue) {
         return data;
     }
     // Only 2 elements
-    if (queue->front->next == queue->rear) {
-        node *tnode = queue->rear;
-        queue->rear = queue->front;
+    if (queue->len == 2) {
+        node *tnode = queue->front;
+        
         queue->front->next = NULL;
-        queue->rear->next = NULL;
+        queue->front = queue->rear;
 
         queue->len--;
         process_t *data = tnode->data;

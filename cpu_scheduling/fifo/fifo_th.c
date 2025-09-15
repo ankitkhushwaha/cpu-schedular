@@ -2,6 +2,7 @@
 #include "dbg.h"
 #include "process.h"
 #include "queue.h"
+#include "priority_queue.h"
 #include "thread_op.h"
 #include <pthread.h>
 #include <stdlib.h>
@@ -60,7 +61,7 @@ process_t *remove_from_waitQueue_fifo() {
 
 process_t *remove_node_by_pid_t_fifo(Queue *queue, int pid, pthread_mutex_t *mutex) {
     pthread_mutex_lock(mutex);
-    process_t *pd = remove_node_by_pid(queue, pid);
+    process_t *pd = p_remove_node_by_pid(queue, pid);
     pthread_mutex_unlock(mutex);
     return pd;
 }

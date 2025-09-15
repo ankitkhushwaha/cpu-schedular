@@ -23,6 +23,22 @@ error:
     exit(EXIT_FAILURE);
 }
 
+static bool _simulate_srtf() {
+    bool should_run = false;
+    pthread_mutex_lock(&readyQueue_mutex);
+
+    if (running_pd && !isEmpty(readyQueue) &&
+     (readyQueue->front->data->remaining_time < running_pd->remaining_time)){
+        debug("simulating strf");
+        debug("readyQueue->front: %d | running_pd: %d", readyQueue->front->data->pid, running_pd->pid);
+        debug("readyQueue remaining_time: %d | running_pd remaining_time: %d", 
+            readyQueue->front->data->remaining_time, running_pd->remaining_time);
+        should_run = true;
+    }
+    pthread_mutex_unlock(&readyQueue_mutex);
+    return should_run;
+}
+
 void *add_arrival_process_srtf(burst_data **data) {
     int j = 0;
     int t_process = (*data)->t_process;
@@ -40,6 +56,8 @@ void *add_arrival_process_srtf(burst_data **data) {
             p->process_d->a_time = (*data)->b_data[j]->a_time;
 
             p->priority = (*data)->b_data[j]->cpu_burst[0];
+            p->remaining_time = (*data)->b_data[j]->cpu_burst[0];
+
             add_to_readyQueue_srtf(p);
             add_to_taskList_srtf(p);
             debug("process %d is added to [ready,task_list] queue at time: %d", j,
@@ -104,43 +122,65 @@ static STATUS _process_cpu(process_t **pd) {
         _status = TERMINATED;
         goto final;
     }
-
-    if ((*pd)->status == NEW) {
-        start_time = read_global_counter();
-        (*pd)->cpu_time = (*pd)->process_d->cpu_burst[0];
-        update_global_counter((*pd)->process_d->cpu_burst[0]);
-        end_time = read_global_counter();
-        (*pd)->process_time += (*pd)->process_d->cpu_burst[0];
-
-        (*pd)->cpu_index += 1;
-        (*pd)->status = SLEEP;
-        add_to_waitQueue_srtf(*pd);
-        sem_post(&wait_count);
-        _status = SLEEP;
-        goto final;
+    
+    assert_t((*pd)->status == NEW || (*pd)->status == READY);
+    if ((*pd)->status == NEW){
+        assert_t((*pd)->cpu_index == 0);
     }
-    if ((*pd)->status == READY) {
-        start_time = read_global_counter();
-        // cpu work will be done
-        (*pd)->cpu_time += (*pd)->process_d->cpu_burst[(*pd)->cpu_index];
-        (*pd)->process_time += (*pd)->process_d->cpu_burst[(*pd)->cpu_index];
-
-        update_global_counter((*pd)->process_d->cpu_burst[(*pd)->cpu_index]);
-        end_time = read_global_counter();
-        (*pd)->cpu_index += 1;
-
-        (*pd)->status = SLEEP;
-        add_to_waitQueue_srtf(*pd);
-        sem_post(&wait_count);
-        _status = SLEEP;
-        goto final;
+    
+    int time = 0, proc_time = 0;
+    bool should_run = false;
+    start_time = read_global_counter();
+    proc_time = (*pd)->process_d->cpu_burst[(*pd)->cpu_index];
+    while (time < proc_time){
+        (*pd)->cpu_time++;
+        (*pd)->process_time++;
+        (*pd)->remaining_time--;
+        update_global_counter(1);
+        time++;
+        should_run = _simulate_srtf();
+        if (should_run){
+            debug("_simulate_srtf got triggered");
+            end_time = read_global_counter();
+            goto swap;
+        }
     }
+    end_time = read_global_counter();
+    (*pd)->cpu_index += 1;
+
+    if ((*pd)->cpu_index < (*pd)->process_d->cpu_burst_size){
+        pthread_mutex_lock(&task_list_mutex);
+        (*pd)->priority = (*pd)->process_d->cpu_burst[(*pd)->cpu_index];
+        pthread_mutex_unlock(&task_list_mutex);
+    }
+    (*pd)->remaining_time = (*pd)->process_d->cpu_burst[(*pd)->cpu_index];
+    (*pd)->status = SLEEP;
+    add_to_waitQueue_srtf(*pd);
+    sem_post(&wait_count);
+    _status = SLEEP;
+    goto final;
+    
+swap:
+    pthread_mutex_lock(&task_list_mutex);
+    (*pd)->priority = (*pd)->remaining_time;
+    pthread_mutex_unlock(&task_list_mutex);
+    (*pd)->status = READY;
+    add_to_readyQueue_srtf(*pd);
+    // sem_post(&ready_count);
+    running_pd = *pd = remove_from_readyQueue_srtf();
+    debug("Process %d is running with state: %s", (*pd)->pid, STATUS_ARR[(*pd)->status]);
+    _status = _process_cpu(&running_pd);
+    goto final;
+
     debug("Process %d with invalid state: %s given", (*pd)->pid, STATUS_ARR[(*pd)->status]);
     _status = UNDEFINED;
 
 final:
-    if (_status != TERMINATED && _status != UNDEFINED)
+    if (_status != TERMINATED && _status != UNDEFINED){
+        assert_t(_status == SLEEP);
         write_cpu_process_data(*pd, start_time, end_time);
+        fflush(task_log);
+    }
     clock_gettime(CLOCK_REALTIME, &wall_timer->end);
     print_time(wall_timer->end, "END", true);
     struct timespec diff = diff_timespec(wall_timer);
@@ -291,7 +331,6 @@ void *wakeUp_srtf() {
         //     continue;
         // }
         if (sem_trywait(&wait_count) == 0) {
-            // debug("TERMINATED_PROCESS: %d, TOTAL_PROCESS: %d, index: %d",
             sleeping_pd = remove_from_waitQueue_srtf();
             if (sleeping_pd) {
                 debug("Process %d is doing io with state: %s", sleeping_pd->pid,
@@ -307,7 +346,6 @@ void *wakeUp_srtf() {
                 debug("BUG: No process in wait queue");
             }
         }
-        //      read_term_counter(), TOTAL_PROCESS, j);
 
         j++;
     }

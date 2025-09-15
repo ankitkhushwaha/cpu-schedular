@@ -2,8 +2,13 @@
 #define SRTF_H
 
 #include "file.h"
+#include "queue.h"
 #include "sched_common.h"
 #include "time_t.h"
+#include <pthread.h>
+
+extern Queue *readyQueue;
+extern pthread_mutex_t readyQueue_mutex;
 
 extern process_t *running_pd;
 extern process_t *sleeping_pd;

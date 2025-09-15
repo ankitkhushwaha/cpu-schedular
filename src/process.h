@@ -14,6 +14,7 @@ extern const char *STATUS_ARR[7];
 typedef struct {
     int pid;
     int priority;
+    int remaining_time;
     burst_line *process_d;
     int cpu_index;
     int io_index;
