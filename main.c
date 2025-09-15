@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
     check(data != NULL, "Failed to read input file '%s'", input_file);
     TOTAL_PROCESS = data->t_process;
     init_queues();
-    init_scheduler("srtf");
+    init_scheduler("rr");
     pthread_t arrivalThread, schedularThread, wakeupThread;
     sem_init(&wait_count, 0, 0);
     sem_init(&ready_count, 0, 0);
