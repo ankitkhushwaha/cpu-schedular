@@ -20,6 +20,7 @@ int TOTAL_PROCESS = 0;
 atomic_int TERMINATED_PROCESS = 0;
 FILE *task_log;
 
+int quantum = 50;
 process_t *running_pd;
 process_t *sleeping_pd;
 scheduler_ops_t *process_core;

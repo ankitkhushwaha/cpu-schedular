@@ -38,6 +38,7 @@ void *add_arrival_process_rr(burst_data **data) {
                   read_global_counter());
             // assert_t((*data)->b_data[j]->a_time == read_global_counter());
             p->process_d->a_time = (*data)->b_data[j]->a_time;
+            p->remaining_time = (*data)->b_data[j]->cpu_burst[0];
 
             add_to_readyQueue_rr(p);
             add_to_taskList_rr(p);
@@ -104,42 +105,58 @@ static STATUS _process_cpu(process_t **pd) {
         goto final;
     }
 
+    assert_t((*pd)->status == NEW || (*pd)->status == READY);
     if ((*pd)->status == NEW) {
-        start_time = read_global_counter();
-        (*pd)->cpu_time = (*pd)->process_d->cpu_burst[0];
-        update_global_counter((*pd)->process_d->cpu_burst[0]);
-        end_time = read_global_counter();
-        (*pd)->process_time += (*pd)->process_d->cpu_burst[0];
+        assert_t((*pd)->cpu_index == 0);
+    }
 
-        (*pd)->cpu_index += 1;
-        (*pd)->status = SLEEP;
-        add_to_waitQueue_rr(*pd);
-        sem_post(&wait_count);
-        _status = SLEEP;
+    int time = 0, proc_time = 0;
+    start_time = read_global_counter();
+    proc_time = (*pd)->remaining_time;
+    while (time < proc_time && time < quantum) {
+        (*pd)->cpu_time++;
+        (*pd)->process_time++;
+        (*pd)->remaining_time--;
+        update_global_counter(1);
+        time++;
+    }
+    end_time = read_global_counter();
+    debug("proc_time: %d, time: %d, quantum: %d", proc_time, time, quantum);
+    // process isnt finished yet.
+    if (time > quantum) {
+        (*pd)->status = READY;
+        add_to_readyQueue_rr(*pd);
+        sem_post(&ready_count);
+        
+        write_cpu_process_data(*pd, start_time, end_time);
+        running_pd = *pd = remove_from_readyQueue_rr();
+        debug("Process %d is running with state: %s", (*pd)->pid, STATUS_ARR[(*pd)->status]);
+        _status = _process_cpu(&running_pd);
         goto final;
     }
-    if ((*pd)->status == READY) {
-        start_time = read_global_counter();
-        // cpu work will be done
-        (*pd)->cpu_time += (*pd)->process_d->cpu_burst[(*pd)->cpu_index];
-        (*pd)->process_time += (*pd)->process_d->cpu_burst[(*pd)->cpu_index];
+    
+    (*pd)->cpu_index += 1;
 
-        update_global_counter((*pd)->process_d->cpu_burst[(*pd)->cpu_index]);
-        end_time = read_global_counter();
-        (*pd)->cpu_index += 1;
-
-        (*pd)->status = SLEEP;
-        add_to_waitQueue_rr(*pd);
-        sem_post(&wait_count);
-        _status = SLEEP;
-        goto final;
+    if ((*pd)->cpu_index < (*pd)->process_d->cpu_burst_size) {
+        pthread_mutex_lock(&task_list_mutex);
+        (*pd)->remaining_time = (*pd)->process_d->cpu_burst[(*pd)->cpu_index];
+        pthread_mutex_unlock(&task_list_mutex);
     }
+    (*pd)->status = SLEEP;
+    add_to_waitQueue_rr(*pd);
+    sem_post(&wait_count);
+    _status = SLEEP;
+    goto final;
+
     debug("Process %d with invalid state: %s given", (*pd)->pid, STATUS_ARR[(*pd)->status]);
     _status = UNDEFINED;
-
+    
 final:
-    if (_status != TERMINATED && _status != UNDEFINED)
+    if (_status != TERMINATED && _status != UNDEFINED) {
+        assert_t(_status == SLEEP);
         write_cpu_process_data(*pd, start_time, end_time);
+        fflush(task_log);
+    }
     clock_gettime(CLOCK_REALTIME, &wall_timer->end);
     print_time(wall_timer->end, "END", true);
     struct timespec diff = diff_timespec(wall_timer);

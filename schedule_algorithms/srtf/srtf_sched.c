@@ -56,8 +56,7 @@ void *add_arrival_process_srtf(burst_data **data) {
             // assert_t((*data)->b_data[j]->a_time == read_global_counter());
             p->process_d->a_time = (*data)->b_data[j]->a_time;
 
-            p->priority = (*data)->b_data[j]->cpu_burst[0];
-            p->remaining_time = (*data)->b_data[j]->cpu_burst[0];
+            p->priority = p->remaining_time = (*data)->b_data[j]->cpu_burst[0];
 
             add_to_readyQueue_srtf(p);
             add_to_taskList_srtf(p);
@@ -130,7 +129,6 @@ static STATUS _process_cpu(process_t **pd) {
     }
 
     int time = 0, proc_time = 0;
-    bool should_run = false;
     start_time = read_global_counter();
     proc_time = (*pd)->process_d->cpu_burst[(*pd)->cpu_index];
     while (time < proc_time) {
@@ -139,10 +137,11 @@ static STATUS _process_cpu(process_t **pd) {
         (*pd)->remaining_time--;
         update_global_counter(1);
         time++;
-        should_run = _simulate_srtf();
-        if (should_run) {
+        if (_simulate_srtf()) {
             debug("_simulate_srtf got triggered");
             end_time = read_global_counter();
+            
+            write_cpu_process_data(*pd, start_time, end_time);
             goto swap;
         }
     }
@@ -151,10 +150,9 @@ static STATUS _process_cpu(process_t **pd) {
 
     if ((*pd)->cpu_index < (*pd)->process_d->cpu_burst_size) {
         pthread_mutex_lock(&task_list_mutex);
-        (*pd)->priority = (*pd)->process_d->cpu_burst[(*pd)->cpu_index];
+        (*pd)->priority = (*pd)->remaining_time = (*pd)->process_d->cpu_burst[(*pd)->cpu_index];
         pthread_mutex_unlock(&task_list_mutex);
     }
-    (*pd)->remaining_time = (*pd)->process_d->cpu_burst[(*pd)->cpu_index];
     (*pd)->status = SLEEP;
     add_to_waitQueue_srtf(*pd);
     sem_post(&wait_count);
